@@ -14,7 +14,8 @@ import BIP32Swift
 
 
 public struct SolanaKeyPair {
-
+    public static let deriveKeyString = "ed25519 seed"
+    
     public var secretKey: Data
     public var mnemonics: String?
     public var derivePath: String?
@@ -32,43 +33,63 @@ public struct SolanaKeyPair {
         var secretKeyData = Data(ed25519KeyPair.privateRaw)
         secretKeyData.append(ed25519KeyPair.publicKey.raw)
         
-        self.init(secretKey: secretKeyData)
+        self.secretKey = secretKeyData
     }
     
-    public init(mnemonics: String, pathType: SolanaMnemonicPathType) throws {
+    public init(seed: Data? = nil,mnemonics: String, path:String) throws {
+        if seed == nil {
+            try self.init(mnemonics: mnemonics, path: path)
+        } else {
+            try self.init(seed:seed!)
+            self.mnemonics = mnemonics
+            self.derivePath = path
+        }
+    }
+    
+    public init(mnemonics: String, path:String = "") throws {
+        let pathType = SolanaMnemonicPath.getMnemonicPathType(mnemonicPath: path)
         guard let mnemonicSeed = BIP39.seedFromMmemonics(mnemonics) else {
             throw Error.invalidMnemonic
         }
-        let path = pathType.path()
         switch pathType {
         case .SolanaMnemonicPathType_Ed25519,.SolanaMnemonicPathType_Ed25519_Old:
-            let (seed, _) = SolanaKeyPair.ed25519DeriveKey(path: path, seed: mnemonicSeed)
-            try self.init(seed: seed)
+            let (deSeed,_) = SolanaKeyPair.deriveKey(path:path , seed: mnemonicSeed, keyString: SolanaKeyPair.deriveKeyString)
+            try self.init(seed:deSeed,mnemonics: mnemonics,path: path)
         case .SolanaMnemonicPathType44,.SolanaMnemonicPathType501:
-            let (seed, _) = try SolanaKeyPair.bip32DeriveKey(path: path, seed: mnemonicSeed)
-            try self.init(seed: seed)
+            guard let node = HDNode(seed: mnemonicSeed), let treeNode = node.derive(path: path) else {
+                throw Error.invalidDerivePath
+            }
+            guard let nodeSeed = treeNode.privateKey else {
+                throw Error.invalidDerivePath
+            }
+            try self.init(seed:nodeSeed,mnemonics: mnemonics,path: path)
         default:
-            try self.init(seed: mnemonicSeed)
-        }
-        
-        self.mnemonics = mnemonics
-        self.derivePath = path
+            try self.init(seed:mnemonicSeed,mnemonics: mnemonics,path: path)        }
     }
     
     public static func randomKeyPair() throws -> SolanaKeyPair {
         guard let mnemonic = try? BIP39.generateMnemonics(bitsOfEntropy: 128) else{
             throw SolanaKeyPair.Error.invalidMnemonic
         }
-        return try SolanaKeyPair(mnemonics: mnemonic, pathType: .SolanaMnemonicPathType_Ed25519)
+        return try SolanaKeyPair(mnemonics: mnemonic, path:SolanaMnemonicPathType.SolanaMnemonicPathType_Ed25519.path())
     }
     
-    public static func ed25519DeriveKey(path: String, seed: Data) -> (key: Data, chainCode: Data) {
-        let masterKeyData = Data(try! HMAC(key:[UInt8]("ed25519 seed".utf8), variant: .sha512).authenticate([UInt8](seed)))
-        
-        var key = masterKeyData.subdata(in:0..<32)
-        var chainCode = masterKeyData.subdata(in:32..<64)
+    public static func deriveKey(path:String, seed:Data, keyString:String) -> (seed:Data,chainCode:Data) {
+        let (masterKey,masterChainCode) = self.masterKeys(seed: seed, keyString: keyString)
         let paths = path.components(separatedBy: "/")
-
+        return self.deriveKeys(paths: paths, seed: masterKey, chainCode: masterChainCode)
+    }
+    
+    public static func masterKeys(seed:Data, keyString:String) -> (seedData:Data,chainCode:Data) {
+        let hashData = Data(try! HMAC(key:[UInt8](keyString.utf8), variant: .sha512).authenticate([UInt8](seed)))
+        let masterKey = hashData.subdata(in:0..<32)
+        let masterChainCode = hashData.subdata(in:32..<64)
+        return (masterKey,masterChainCode)
+    }
+    
+    public static func deriveKeys(paths:[String], seed:Data,chainCode:Data) -> (seed:Data,chainCode:Data) {
+        var seedData = seed
+        var chainCodeData = chainCode
         for path in paths {
             if path == "m" {
                 continue
@@ -84,23 +105,13 @@ public struct SolanaKeyPair {
             let pathDataBE = withUnsafeBytes(of: pathData32.bigEndian, Array.init)
             var data = Data()
             data.append([0], count: 1)
-            data.append(key)
+            data.append(seedData)
             data.append(pathDataBE,count: 4)
-            let d = Data(try! HMAC(key: chainCode.bytes,variant: .sha512).authenticate(data.bytes))
-            key = d.subdata(in: 0..<32)
-            chainCode = d.subdata(in:32..<64)
+            let d = Data(try! HMAC(key: chainCodeData.bytes,variant: .sha512).authenticate(data.bytes))
+            seedData = d.subdata(in: 0..<32)
+            chainCodeData = d.subdata(in:32..<64)
         }
-        return (key,chainCode)
-    }
-    
-    public static func bip32DeriveKey(path: String, seed: Data) throws -> (key: Data, HDNode) {
-        guard let node = HDNode(seed: seed), let treeNode = node.derive(path: path) else {
-            throw Error.invalidDerivePath
-        }
-        guard let key = treeNode.privateKey else {
-            throw Error.invalidDerivePath
-        }
-        return (key, treeNode)
+        return (seedData,chainCodeData)
     }
 }
 
