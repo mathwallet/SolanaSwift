@@ -1,6 +1,8 @@
 import XCTest
 import BigInt
 import CryptoSwift
+import BIP39swift
+
 @testable import SolanaSwift
 
 final class SolanaSwiftTests: XCTestCase {
@@ -93,5 +95,35 @@ final class SolanaSwiftTests: XCTestCase {
 
         let keypair5 = try SolanaKeyPair(mnemonics: self.mnemonics, path: SolanaMnemonicPath.PathType.None.default)
         XCTAssert(keypair5.publicKey.address == "HdTeuiXWF6jXmrBufHqZQQ2WS3Vr15gHVfJdbzr5hKKb")
+    }
+    
+    func testDeriveKeyExample() throws {
+        guard let mnemonicSeed = BIP39.seedFromMmemonics(self.mnemonics) else {
+            XCTAssert(false)
+            return
+        }
+        
+        let (key, chainCode) = try SolanaKeyPair.ed25519DeriveKey(path: "m/44'/501'/0'/0'", seed: mnemonicSeed)
+        
+        
+        let (key1, chainCode1) = try SolanaKeyPair.ed25519DeriveKey(path: "m/44'/501'", seed: mnemonicSeed)
+        let (key2, chainCode2) = try SolanaKeyPair.ed25519DeriveKey(path: "0'/0'", key: key1, chainCode: chainCode1)
+        
+        XCTAssert(key.toHexString() == key2.toHexString())
+    }
+    
+    func testDeriveKeyExample2() throws {
+        guard let mnemonicSeed = BIP39.seedFromMmemonics(self.mnemonics) else {
+            XCTAssert(false)
+            return
+        }
+        
+        let (key, node) = try SolanaKeyPair.bip32DeriveKey(path: "m/501'/0'/0/0", seed: mnemonicSeed)
+        
+        
+        let (key1, node1) = try SolanaKeyPair.bip32DeriveKey(path: "m/501'/0'", seed: mnemonicSeed)
+        let (key2, node2) = try SolanaKeyPair.bip32DeriveKey(path: "0/0", node: node1)
+        
+        XCTAssert(key.toHexString() == key2.toHexString())
     }
 }
