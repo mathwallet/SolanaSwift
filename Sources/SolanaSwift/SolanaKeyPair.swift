@@ -67,10 +67,18 @@ public struct SolanaKeyPair {
     public static func ed25519DeriveKey(path: String, seed: Data) -> (key: Data, chainCode: Data) {
         let masterKeyData = Data(try! HMAC(key:[UInt8]("ed25519 seed".utf8), variant: .sha512).authenticate([UInt8](seed)))
         
-        var key = masterKeyData.subdata(in:0..<32)
-        var chainCode = masterKeyData.subdata(in:32..<64)
+        let key = masterKeyData.subdata(in:0..<32)
+        let chainCode = masterKeyData.subdata(in:32..<64)
+        
+        return self.ed25519DeriveKey(path: path, key: key, chainCode: chainCode)
+    }
+    
+    public static func ed25519DeriveKey(path: String, key: Data, chainCode: Data) -> (key: Data, chainCode: Data) {
         let paths = path.components(separatedBy: "/")
 
+        var newKey = key
+        var newChainCode = chainCode
+        
         for path in paths {
             if path == "m" {
                 continue
@@ -86,19 +94,28 @@ public struct SolanaKeyPair {
             let pathDataBE = withUnsafeBytes(of: pathData32.bigEndian, Array.init)
             var data = Data()
             data.append([0], count: 1)
-            data.append(key)
+            data.append(newKey)
             data.append(pathDataBE,count: 4)
-            let d = Data(try! HMAC(key: chainCode.bytes,variant: .sha512).authenticate(data.bytes))
-            key = d.subdata(in: 0..<32)
-            chainCode = d.subdata(in:32..<64)
+            let d = Data(try! HMAC(key: newChainCode.bytes,variant: .sha512).authenticate(data.bytes))
+            newKey = d.subdata(in: 0..<32)
+            newChainCode = d.subdata(in:32..<64)
         }
-        return (key,chainCode)
+        return (newKey, newChainCode)
     }
     
     public static func bip32DeriveKey(path: String, seed: Data) throws -> (key: Data, HDNode) {
-        guard let node = HDNode(seed: seed), let treeNode = node.derive(path: path) else {
+        guard let node = HDNode(seed: seed) else {
             throw Error.invalidDerivePath
         }
+        
+        return try self.bip32DeriveKey(path: path, node: node)
+    }
+    
+    public static func bip32DeriveKey(path: String, node: HDNode) throws -> (key: Data, HDNode) {
+        guard let treeNode = node.derive(path: path) else {
+            throw Error.invalidDerivePath
+        }
+        
         guard let key = treeNode.privateKey else {
             throw Error.invalidDerivePath
         }
