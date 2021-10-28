@@ -35,16 +35,18 @@ public struct SolanaKeyPair {
         self.init(secretKey: secretKeyData)
     }
     
-    public init(mnemonics: String, pathType: SolanaMnemonicPathType) throws {
+    public init(mnemonics: String, path: String) throws {
         guard let mnemonicSeed = BIP39.seedFromMmemonics(mnemonics) else {
             throw Error.invalidMnemonic
         }
-        let path = pathType.path()
+        
+        let pathType = SolanaMnemonicPath.getType(mnemonicPath: path)
+        
         switch pathType {
-        case .SolanaMnemonicPathType_Ed25519,.SolanaMnemonicPathType_Ed25519_Old:
+        case .Ed25519, .Ed25519_Old:
             let (seed, _) = SolanaKeyPair.ed25519DeriveKey(path: path, seed: mnemonicSeed)
             try self.init(seed: seed)
-        case .SolanaMnemonicPathType44,.SolanaMnemonicPathType501:
+        case .BIP32_44, .BIP32_501:
             let (seed, _) = try SolanaKeyPair.bip32DeriveKey(path: path, seed: mnemonicSeed)
             try self.init(seed: seed)
         default:
@@ -59,7 +61,7 @@ public struct SolanaKeyPair {
         guard let mnemonic = try? BIP39.generateMnemonics(bitsOfEntropy: 128) else{
             throw SolanaKeyPair.Error.invalidMnemonic
         }
-        return try SolanaKeyPair(mnemonics: mnemonic, pathType: .SolanaMnemonicPathType_Ed25519)
+        return try SolanaKeyPair(mnemonics: mnemonic, path: SolanaMnemonicPath.PathType.Ed25519.default)
     }
     
     public static func ed25519DeriveKey(path: String, seed: Data) -> (key: Data, chainCode: Data) {

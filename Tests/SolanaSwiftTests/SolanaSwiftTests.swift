@@ -46,7 +46,7 @@ final class SolanaSwiftTests: XCTestCase {
         var transaction = SolanaTransaction()
         transaction.appendInstruction(instruction: instru)
         transaction.appendInstruction(instruction: assin)
-        let keypair = try SolanaKeyPair(mnemonics: self.mnemonics, pathType: SolanaMnemonicPathType.SolanaMnemonicPathType_Ed25519)
+        let keypair = try SolanaKeyPair(mnemonics: self.mnemonics, path: SolanaMnemonicPath.PathType.Ed25519.default)
         transaction.sign(keypair: keypair)
         debugPrint(transaction.serizlize().toHexString())
     }
@@ -79,19 +79,19 @@ final class SolanaSwiftTests: XCTestCase {
     }
     
     func testImportKeyPair() throws {
-        let keypair1 = try SolanaKeyPair(mnemonics: self.mnemonics, pathType: SolanaMnemonicPathType.SolanaMnemonicPathType_Ed25519)
+        let keypair1 = try SolanaKeyPair(mnemonics: self.mnemonics, path: SolanaMnemonicPath.PathType.Ed25519.default)
         XCTAssert(keypair1.publicKey.address == "3w7sqnh3MRpaWHgaxcHekK2eqELC1ugtH2oDbgDcTavb")
         
-//        let keypair2 = try SolanaKeyPair(mnemonics: self.mnemonics, pathType: SolanaMnemonicPathType.SolanaMnemonicPathType_Ed25519_Old)
-//        XCTAssert(keypair2.publicKey.address == "DcaWQQGErxtzTTph7r5xWMxEvWEywGahtjnRvoJPN9Vz")
-//
-        let keypair3 = try SolanaKeyPair(mnemonics: self.mnemonics, pathType: SolanaMnemonicPathType.SolanaMnemonicPathType44)
+        let keypair2 = try SolanaKeyPair(mnemonics: self.mnemonics, path: SolanaMnemonicPath.PathType.Ed25519_Old.default)
+        XCTAssert(keypair2.publicKey.address == "DcaWQQGErxtzTTph7r5xWMxEvWEywGahtjnRvoJPN9Vz")
+
+        let keypair3 = try SolanaKeyPair(mnemonics: self.mnemonics, path: SolanaMnemonicPath.PathType.BIP32_44.default)
         XCTAssert(keypair3.publicKey.address == "EY2kNS5hKfxxLSkbaBMQtQuHYYbjyYk6Ai2phcGMNgpC")
-//
-//        let keypair4 = try SolanaKeyPair(mnemonics: self.mnemonics, pathType: SolanaMnemonicPathType.SolanaMnemonicPathType501)
-//        XCTAssert(keypair4.publicKey.address == "C1YfBTFDNujtYxSj6bxtuWSfhBghv1pgRD6Tvyg7kS7")
-//
-//        let keypair5 = try SolanaKeyPair(mnemonics: self.mnemonics, pathType: SolanaMnemonicPathType.SolanaMnemonicPathTypNone)
-//        XCTAssert(keypair5.publicKey.address == "HdTeuiXWF6jXmrBufHqZQQ2WS3Vr15gHVfJdbzr5hKKb")
+
+        let keypair4 = try SolanaKeyPair(mnemonics: self.mnemonics, path: SolanaMnemonicPath.PathType.BIP32_501.default)
+        XCTAssert(keypair4.publicKey.address == "C1YfBTFDNujtYxSj6bxtuWSfhBghv1pgRD6Tvyg7kS7")
+
+        let keypair5 = try SolanaKeyPair(mnemonics: self.mnemonics, path: SolanaMnemonicPath.PathType.None.default)
+        XCTAssert(keypair5.publicKey.address == "HdTeuiXWF6jXmrBufHqZQQ2WS3Vr15gHVfJdbzr5hKKb")
     }
 }
