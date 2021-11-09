@@ -126,4 +126,10 @@ final class SolanaSwiftTests: XCTestCase {
         
         XCTAssert(key.toHexString() == key2.toHexString())
     }
+    
+    func testDefultInstruction() throws {
+        let signers = [SolanaSigner(publicKey: SolanaPublicKey(base58String: "HdTeuiXWF6jXmrBufHqZQQ2WS3Vr15gHVfJdbzr5hKKb")!)]
+        let instuction = SolanaInstructionDefult(promgramId: SolanaPublicKey(base58String: "C1YfBTFDNujtYxSj6bxtuWSfhBghv1pgRD6Tvyg7kS7")!, signers: signers, data: Data(hex: "0x02000000a086010000000000"))
+        print(instuction.promgramId)
+    }
 }
