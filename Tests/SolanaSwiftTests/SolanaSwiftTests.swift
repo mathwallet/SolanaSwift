@@ -44,10 +44,17 @@ final class SolanaSwiftTests: XCTestCase {
     
     func testTrasaction()  throws {
         let instru = SolanaInstructionTransfer(from: SolanaPublicKey(base58String: "D37m1SKWnyY4fmhEntD84uZpjejUZkbHQUBEP3X74LuH")! , to:SolanaPublicKey(base58String: "GNutLCXQEEcmxkJH5f5rw51bTW2QcLGXqitmN3EaVPoV")!, lamports: BigUInt(5000))
+        
+        debugPrint(instru.promgramId.address)
+        debugPrint(instru.signers)
+        debugPrint(instru.data.toHexString())
+        debugPrint(instru.toHuman())
+        
         let assin = SolanaInstructionAssociatedAccount(from: SolanaPublicKey(base58String: "D37m1SKWnyY4fmhEntD84uZpjejUZkbHQUBEP3X74LuH")!, to:  SolanaPublicKey(base58String: "4KxYRXTZ4PXXDCvaQeG75HLJFdKrwVY6bX5nckp8jpHh")!, associatedToken: SolanaPublicKey(base58String: "CoPhcr5DrGZx6a3pbB2BmrTHjNAokZScQVUdyqCNWyRR")!, mint: SolanaPublicKey(base58String: "GeDS162t9yGJuLEHPWXXGrb1zwkzinCgRwnT8vHYjKza")!)
         var transaction = SolanaTransaction()
         transaction.appendInstruction(instruction: instru)
         transaction.appendInstruction(instruction: assin)
+        
         let keypair = try SolanaKeyPair(mnemonics: self.mnemonics, path: SolanaMnemonicPath.PathType.Ed25519.default)
         transaction.sign(keypair: keypair)
         debugPrint(transaction.serizlize().toHexString())
@@ -125,5 +132,40 @@ final class SolanaSwiftTests: XCTestCase {
         let (key2, _) = try SolanaKeyPair.bip32DeriveKey(path: "0/0", node: node1)
         
         XCTAssert(key.toHexString() == key2.toHexString())
+    }
+    
+    func testDecodeExample() throws {
+        var data = Data()
+        data.appendUInt8(10)
+        data.appendUInt16(10)
+        data.appendUInt32(120)
+        data.appendUInt64(10)
+        data.appendVarInt(288)
+        data.appendUInt8(1)
+        
+        debugPrint(data.toHexString())
+        
+        let data2 = Data(hex: "0a0a00780000000a00000000000000a00201")
+        var index = 0
+        debugPrint(data2.readUInt8(at: index))
+        index = index + 1
+        
+        debugPrint(data2.readUInt16(at: index))
+        index = index + 2
+        
+        debugPrint(data2.readUInt32(at: index))
+        index = index + 4
+        
+        debugPrint(data2.readUInt64(at: index))
+        index = index + 8
+        
+        var length: Int = 0
+        debugPrint(data2.readVarInt(at: index, length: &length))
+        index = index + length
+        
+        debugPrint(data2.readUInt8(at: index))
+        
+        
+        
     }
 }

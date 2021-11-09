@@ -9,9 +9,17 @@ import Foundation
 
 public struct SolanaInstructionAssociatedAccount: SolanaInstructionBase {
     
-    public var promgramId: SolanaPublicKey
+    public var promgramId: SolanaPublicKey = SolanaPublicKey.ASSOCIATEDTOKENPROGRAMID
     
     public var signers = [SolanaSigner]()
+    
+    public var data = Data()
+    
+    public init?(promgramId: SolanaPublicKey, signers: [SolanaSigner], data: Data) {
+        self.promgramId = promgramId
+        self.signers = signers
+        self.data = data
+    }
     
     public init(from: SolanaPublicKey, to: SolanaPublicKey, associatedToken: SolanaPublicKey, mint: SolanaPublicKey) {
         
@@ -23,10 +31,23 @@ public struct SolanaInstructionAssociatedAccount: SolanaInstructionBase {
         self.signers.append(SolanaSigner(publicKey: SolanaPublicKey.TOKENPROGRAMID))
         self.signers.append(SolanaSigner(publicKey: SolanaPublicKey.SYSVARRENTPUBKEY))
 
-        self.promgramId = SolanaPublicKey.ASSOCIATEDTOKENPROGRAMID
+        self.data = toData()
     }
     
-    public func toData() -> Data {
+    private func toData() -> Data {
         return Data()
+    }
+    
+    public static func decode(promgramId: SolanaPublicKey, signers: [SolanaSigner], data: Data) -> SolanaInstructionAssociatedAccount? {
+        return nil
+    }
+    
+}
+
+extension SolanaInstructionAssociatedAccount: SolanaHumanReadable {
+    public func toHuman() -> Dictionary<String, Any> {
+        return [
+            "type": "Associated Account"
+        ]
     }
 }

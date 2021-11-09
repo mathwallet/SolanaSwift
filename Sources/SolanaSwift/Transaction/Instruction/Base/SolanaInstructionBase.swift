@@ -10,6 +10,7 @@ import Foundation
 public protocol SolanaInstructionBase {
     var promgramId: SolanaPublicKey{ get set }
     var signers: [SolanaSigner]{ get set }
+    var data: Data{ get set }
     
-    func toData() -> Data
+    init?(promgramId: SolanaPublicKey, signers: [SolanaSigner], data: Data)
 }

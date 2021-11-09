@@ -25,8 +25,4 @@ public struct SolanaSignature {
     public func base58Sting() -> String {
         return Base58.base58Encode(self.data.bytes)
     }
-    
-    public func toByte() -> Data {
-        return self.data
-    }
 }

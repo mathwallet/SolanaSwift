@@ -8,19 +8,46 @@
 import Foundation
 import Base58Swift
 
+public typealias SolanaInstruction = SolanaInstructionBase & SolanaHumanReadable
+
 public struct SolanaTransaction {
-    public var instructions = [SolanaInstructionBase]()
+    public var instructions = [SolanaInstruction]()
     public var signatures = [SolanaSignature]()
     public var recentBlockhash = ""
     
     public init() {
     }
     
-    public mutating func appendInstruction(instruction:SolanaInstructionBase) {
+    public mutating func appendInstruction(instruction: SolanaInstruction) {
         self.instructions.append(instruction)
     }
     
-    private func toData() -> Data {
+    public func serializeAndBase58() -> String {
+        return Base58.base58Encode(self.serizlize().bytes)
+    }
+    
+    public mutating func sign(keypair:SolanaKeyPair)  {
+        self.sign(keypair: keypair, otherPairs: [])
+    }
+    
+    public mutating func sign(keypair:SolanaKeyPair,otherPairs:[SolanaKeyPair]) {
+        let dataDigest = self.serizlize()
+        self.signatures.removeAll()
+        self.signatures.append(SolanaSignature.init(data:keypair.signDigest(messageDigest: dataDigest)))
+        if !otherPairs.isEmpty {
+            for otherKeypair in otherPairs {
+                self.signatures.append(SolanaSignature.init(data:otherKeypair.signDigest(messageDigest: dataDigest)))
+            }
+        }
+    }
+    
+}
+
+// MARK: - Serizlize & Deserialize
+
+extension SolanaTransaction: SolanaHumanReadable {
+    
+    public func serizlize() -> Data {
         var tempSigners = [SolanaSigner]()
         tempSigners.append(contentsOf: self.instructions.flatMap({ $0.signers }))
         tempSigners.append(contentsOf: self.instructions.map({ SolanaSigner(publicKey: $0.promgramId) }))
@@ -38,9 +65,9 @@ public struct SolanaTransaction {
         
         var data = Data()
         if !signatures.isEmpty {
-            data.appendVarInt(signatures.count)
+            data.appendVarInt(UInt64(signatures.count))
             for signature in signatures {
-                data.append(signature.toByte())
+                data.append(signature.data)
             }
         }
         data.appendUInt8(UInt8(signers.filter({ $0.isSigner }).count))
@@ -51,42 +78,26 @@ public struct SolanaTransaction {
             data.append(signer.publicKey.data)
         }
         data.appendBytes(Base58.base58Decode(self.recentBlockhash)!)
-        data.appendVarInt(self.instructions.count)
+        data.appendVarInt(UInt64(self.instructions.count))
         for instructionBase in self.instructions {
             data.appendUInt8(UInt8(signers.map({ $0.publicKey }).firstIndex(of: instructionBase.promgramId)!))
-            data.appendVarInt(instructionBase.signers.count)
+            data.appendVarInt(UInt64(instructionBase.signers.count))
             for signer in instructionBase.signers {
                 data.appendUInt8(UInt8(signers.firstIndex(of: signer)!))
             }
-            let instructionData = instructionBase.toData()
-            data.appendVarInt(instructionData.count)
+            let instructionData = instructionBase.data
+            data.appendVarInt(UInt64(instructionData.count))
             data.append(instructionData)
         }
         return data
     }
     
-    public func serizlize() -> Data{
-        return self.toData()
-    }
-    
-    public func serializeAndBase58() -> String {
-       return Base58.base58Encode(([UInt8])(self.toData()))
-    }
-    
-    public mutating func sign(keypair:SolanaKeyPair)  {
-        self.sign(keypair: keypair, otherPairs: [])
-    }
-    
-    public mutating func sign(keypair:SolanaKeyPair,otherPairs:[SolanaKeyPair]) {
-        let dataDigest = self.toData()
-        self.signatures.removeAll()
-        self.signatures.append(SolanaSignature.init(data:keypair.signDigest(messageDigest: dataDigest)))
-        if !otherPairs.isEmpty {
-            for otherKeypair in otherPairs {
-                self.signatures.append(SolanaSignature.init(data:otherKeypair.signDigest(messageDigest: dataDigest)))
-            }
+    public func toHuman() -> Dictionary<String, Any> {
+        var messages: Dictionary<String, Any>  = [:]
+        for (i, instruction) in self.instructions.enumerated() {
+            messages["\(i)"] = instruction.toHuman()
         }
+        return messages
     }
     
 }
-    

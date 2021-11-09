@@ -9,27 +9,45 @@ import Foundation
 import BigInt
 
 public struct SolanaInstructionToken: SolanaInstructionBase {
-    public var instructionType: UInt8 = 3
-    
-    public var promgramId: SolanaPublicKey
+    public var promgramId: SolanaPublicKey = SolanaPublicKey.TOKENPROGRAMID
     
     public var signers = [SolanaSigner]()
     
-    public var lamports:BigUInt
+    public var data = Data()
+    
+    
+    public init?(promgramId: SolanaPublicKey, signers: [SolanaSigner], data: Data) {
+        self.promgramId = promgramId
+        self.signers = signers
+        self.data = data
+    }
     
     public init(tokenPub: SolanaPublicKey, destination: SolanaPublicKey, owner: SolanaPublicKey, lamports: BigUInt) {
         self.signers.append(SolanaSigner(publicKey: tokenPub, isSigner: false, isWritable: true))
         self.signers.append(SolanaSigner(publicKey: destination, isSigner: false, isWritable: true))
         self.signers.append(SolanaSigner(publicKey: owner, isSigner: true, isWritable: true))
         
-        self.lamports = lamports
-        self.promgramId = SolanaPublicKey.TOKENPROGRAMID
+        self.data = toData(lamports: lamports)
     }
     
-    public func toData() -> Data {
+    private func toData(lamports: BigUInt) -> Data {
         var data = Data()
-        data.appendUInt8(self.instructionType)
-        data.appendUInt64(UInt64(self.lamports.description)!)
+        // Instruction Type
+        data.appendUInt8(3)
+        data.appendUInt64(UInt64(lamports.description)!)
         return data
+    }
+}
+
+extension SolanaInstructionToken: SolanaHumanReadable {
+    public func toHuman() -> Dictionary<String, Any> {
+//        let type = self.data.readUInt8(at: 0)
+        let lamports = self.data.readUInt64(at: 1)
+        return [
+            "type": "Transfer Token",
+            "data": [
+                "lamports": lamports
+            ]
+        ]
     }
 }

@@ -9,26 +9,43 @@ import Foundation
 import BigInt
 
 public struct SolanaInstructionTransfer: SolanaInstructionBase {
-    public var instructionType: UInt32
-    
-    public var promgramId: SolanaPublicKey
+    public var promgramId: SolanaPublicKey = SolanaPublicKey.OWNERPROGRAMID
     
     public var signers = [SolanaSigner]()
     
-    public var lamports: BigUInt
+    public var data = Data()
     
-    public init(from: SolanaPublicKey, to: SolanaPublicKey, lamports:BigUInt) {
-        self.signers.append(SolanaSigner(publicKey: from, isSigner: true, isWritable: true))
-        self.signers.append(SolanaSigner(publicKey: to, isSigner: false, isWritable: true))
-        self.lamports = lamports
-        self.instructionType = 2
-        self.promgramId = SolanaPublicKey.OWNERPROGRAMID
+    public init?(promgramId: SolanaPublicKey, signers: [SolanaSigner], data: Data) {
+        self.promgramId = promgramId
+        self.signers = signers
+        self.data = data
     }
     
-    public func toData() -> Data {
+    public init(from: SolanaPublicKey, to: SolanaPublicKey, lamports: BigUInt) {
+        self.signers.append(SolanaSigner(publicKey: from, isSigner: true, isWritable: true))
+        self.signers.append(SolanaSigner(publicKey: to, isSigner: false, isWritable: true))
+        
+        self.data = toData(lamports: lamports)
+    }
+    
+    private func toData(lamports: BigUInt) -> Data {
         var data = Data()
-        data.appendUInt32(self.instructionType)
-        data.appendUInt64(UInt64(self.lamports.description)!)
+        // InstructionType
+        data.appendUInt32(2)
+        data.appendUInt64(UInt64(lamports.description)!)
         return data
+    }
+}
+
+extension SolanaInstructionTransfer: SolanaHumanReadable {
+    public func toHuman() -> Dictionary<String, Any> {
+//        let type = self.data.readUInt32(at: 0)
+        let lamports = self.data.readUInt64(at: 4)
+        return [
+            "type": "Transfer Token",
+            "data": [
+                "lamports": lamports
+            ]
+        ]
     }
 }
