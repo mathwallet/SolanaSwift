@@ -103,11 +103,11 @@ final class SolanaSwiftTests: XCTestCase {
             return
         }
         
-        let (key, chainCode) = try SolanaKeyPair.ed25519DeriveKey(path: "m/44'/501'/0'/0'", seed: mnemonicSeed)
+        let (key, _) = SolanaKeyPair.ed25519DeriveKey(path: "m/44'/501'/0'/0'", seed: mnemonicSeed)
         
         
-        let (key1, chainCode1) = try SolanaKeyPair.ed25519DeriveKey(path: "m/44'/501'", seed: mnemonicSeed)
-        let (key2, chainCode2) = try SolanaKeyPair.ed25519DeriveKey(path: "0'/0'", key: key1, chainCode: chainCode1)
+        let (key1, chainCode1) = SolanaKeyPair.ed25519DeriveKey(path: "m/44'/501'", seed: mnemonicSeed)
+        let (key2, _) = SolanaKeyPair.ed25519DeriveKey(path: "0'/0'", key: key1, chainCode: chainCode1)
         
         XCTAssert(key.toHexString() == key2.toHexString())
     }
@@ -118,11 +118,11 @@ final class SolanaSwiftTests: XCTestCase {
             return
         }
         
-        let (key, node) = try SolanaKeyPair.bip32DeriveKey(path: "m/501'/0'/0/0", seed: mnemonicSeed)
+        let (key, _) = try SolanaKeyPair.bip32DeriveKey(path: "m/501'/0'/0/0", seed: mnemonicSeed)
         
         
-        let (key1, node1) = try SolanaKeyPair.bip32DeriveKey(path: "m/501'/0'", seed: mnemonicSeed)
-        let (key2, node2) = try SolanaKeyPair.bip32DeriveKey(path: "0/0", node: node1)
+        let (_, node1) = try SolanaKeyPair.bip32DeriveKey(path: "m/501'/0'", seed: mnemonicSeed)
+        let (key2, _) = try SolanaKeyPair.bip32DeriveKey(path: "0/0", node: node1)
         
         XCTAssert(key.toHexString() == key2.toHexString())
     }
