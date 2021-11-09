@@ -38,10 +38,6 @@ public struct SolanaInstructionAssociatedAccount: SolanaInstructionBase {
         return Data()
     }
     
-    public static func decode(promgramId: SolanaPublicKey, signers: [SolanaSigner], data: Data) -> SolanaInstructionAssociatedAccount? {
-        return nil
-    }
-    
 }
 
 extension SolanaInstructionAssociatedAccount: SolanaHumanReadable {
