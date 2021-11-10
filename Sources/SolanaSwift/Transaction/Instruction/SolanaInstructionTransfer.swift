@@ -39,12 +39,23 @@ public struct SolanaInstructionTransfer: SolanaInstructionBase {
 
 extension SolanaInstructionTransfer: SolanaHumanReadable {
     public func toHuman() -> Dictionary<String, Any> {
-//        let type = self.data.readUInt32(at: 0)
+        
+        var from = ""
+        var to = ""
+        self.signers.forEach({ signer in
+            if signer.isSigner {
+                from = signer.publicKey.address
+            } else {
+                to = signer.publicKey.address
+            }
+        })
         let lamports = self.data.readUInt64(at: 4)
         return [
-            "type": "Transfer Token",
+            "type": "Transfer",
             "data": [
-                "lamports": lamports
+                "from":from,
+                "to":to,
+                "lamports":"\(lamports)"
             ]
         ]
     }

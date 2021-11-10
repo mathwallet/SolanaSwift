@@ -41,13 +41,20 @@ public struct SolanaInstructionToken: SolanaInstructionBase {
 
 extension SolanaInstructionToken: SolanaHumanReadable {
     public func toHuman() -> Dictionary<String, Any> {
-//        let type = self.data.readUInt8(at: 0)
+        var dataDic:[String:String] = [String:String]()
+        for i in 0..<self.signers.count {
+            let signer = self.signers[i]
+            if signer.isSigner {
+                dataDic["owner"] = signer.publicKey.address
+                continue
+            }
+            dataDic["pubkey\(i)"] = signer.publicKey.address
+        }
         let lamports = self.data.readUInt64(at: 1)
+        dataDic["lamports"] = "\(lamports)"
         return [
             "type": "Transfer Token",
-            "data": [
-                "lamports": lamports
-            ]
+            "data": dataDic
         ]
     }
 }

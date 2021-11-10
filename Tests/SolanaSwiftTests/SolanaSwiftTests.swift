@@ -168,4 +168,14 @@ final class SolanaSwiftTests: XCTestCase {
         
         
     }
+    func testToHuman() throws {
+        let array:[SolanaSigner] = [SolanaSigner(publicKey: SolanaPublicKey(base58String: "D37m1SKWnyY4fmhEntD84uZpjejUZkbHQUBEP3X74LuH")!,isSigner: true,isWritable: true),SolanaSigner(publicKey: SolanaPublicKey(base58String: "EY2kNS5hKfxxLSkbaBMQtQuHYYbjyYk6Ai2phcGMNgpC")!,isSigner: false,isWritable: true),SolanaSigner(publicKey: SolanaPublicKey(base58String: "DcaWQQGErxtzTTph7r5xWMxEvWEywGahtjnRvoJPN9Vz")!)]
+        let instruction = SolanaInstructionTransfer(promgramId: SolanaPublicKey(base58String: "TokenwAJbNbGKPFXCWuBvf9Ss623VQ5DA")!, signers: array, data: Data(hex: "0x02000000a08601000000000002000000a086010000000000"))
+        
+        let dataDic:Dictionary = instruction!.toHuman()
+        let dataarray = dataDic["data"] as! Dictionary<String, Any>
+        let data = try? JSONSerialization.data(withJSONObject: dataarray, options: [])
+        let str = String(data: data!, encoding: String.Encoding.utf8)
+        debugPrint(str!)
+    }
 }
