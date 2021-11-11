@@ -135,17 +135,15 @@ public struct SolanaRPCProvider {
     }
 }
 
-extension SolanaRPCProvider {
-    public enum SolanaRpcProviderError: Error {
-        case unknown
-        case server(message: String)
-        public var errorDescription: String? {
-            switch self {
-            case .server(let message):
-                return message
-            default:
-                return "Unknown error"
-            }
+public enum SolanaRpcProviderError: Error {
+    case unknown
+    case server(message: String)
+    public var errorDescription: String? {
+        switch self {
+        case .server(let message):
+            return message
+        default:
+            return "Unknown error"
         }
     }
 }
