@@ -139,8 +139,7 @@ extension SolanaRPCProvider {
     public enum SolanaRpcProviderError: Error {
         case unknown
         case server(message: String)
-        
-        var errorDescription: String? {
+        public var errorDescription: String? {
             switch self {
             case .server(let message):
                 return message
