@@ -38,11 +38,25 @@ extension SolanaInstructionRaw: SolanaHumanReadable {
                 let i = SolanaInstructionToken(promgramId: promgramId, signers: signers, data: data) {
                 return i.toHuman()
             }
+        } else if promgramId == SolanaPublicKey.ASSOCIATEDTOKENPROGRAMID {
+            // SolanaInstructionAssociatedAccount
+            if let i = SolanaInstructionAssociatedAccount(promgramId: promgramId, signers: signers, data: data) {
+                return i.toHuman()
+            }
+        } else if promgramId == SolanaPublicKey.OWNERVALIDATIONPROGRAMID {
+            // SolanaInstructionAssetOwner
+            if let i = SolanaInstructionAssetOwner(promgramId: promgramId, signers: signers, data: data){
+                return i.toHuman()
+            }
         }
-        
+        var dataDic:[String:String] = [String:String]()
+        for i in 0..<self.signers.count {
+            dataDic["pubkey\(i)"] = self.signers[i].publicKey.address
+        }
+        dataDic["data"] = self.data.toHexString()
         return [
             "type": "Unknown Type",
-            "data": data.toHexString()
+            "data": dataDic
         ]
     }
 }

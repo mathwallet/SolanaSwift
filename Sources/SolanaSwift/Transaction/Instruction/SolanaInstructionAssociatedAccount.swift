@@ -42,8 +42,24 @@ public struct SolanaInstructionAssociatedAccount: SolanaInstructionBase {
 
 extension SolanaInstructionAssociatedAccount: SolanaHumanReadable {
     public func toHuman() -> Dictionary<String, Any> {
+        var dataDic:[String:String] = [String:String]()
+        for i in 0..<self.signers.count {
+            let signer = self.signers[i]
+            if signer.isWritable {
+                if signer.isSigner {
+                    dataDic["from"] = signer.publicKey.address
+                    continue
+                } else {
+                    dataDic["associatedToken"] = signer.publicKey.address
+                    continue
+                }
+            } else {
+                dataDic["key\(i)"] = signer.publicKey.address
+            }
+        }
         return [
-            "type": "Associated Account"
+            "type": "Associated Account",
+            "data": dataDic
         ]
     }
 }

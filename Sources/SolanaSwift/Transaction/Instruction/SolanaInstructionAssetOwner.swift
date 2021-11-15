@@ -34,7 +34,11 @@ public struct SolanaInstructionAssetOwner: SolanaInstructionBase {
 extension SolanaInstructionAssetOwner: SolanaHumanReadable {
     public func toHuman() -> Dictionary<String, Any> {
         return [
-            "type": "Asset Owner"
+            "type": "Asset Owner",
+            "data": [
+                "destination":self.signers.first?.publicKey.address,
+                "data":self.data.toHexString()
+                    ]
         ]
     }
 }
