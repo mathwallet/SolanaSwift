@@ -55,6 +55,41 @@ public struct SolanaPublicKey {
         return nil
     }
     
+    public static func createProgramAddress(mint:SolanaPublicKey) -> SolanaPublicKey? {
+        var i = 255
+        while i > 0 {
+            var data = Data()
+            data.appendString("metadata")
+            data.appendPubKey(SolanaPublicKey(base58String: "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s")!)
+            data.appendPubKey(mint)
+            data.appendUInt8(UInt8(i))
+            data.appendPubKey(SolanaPublicKey(base58String: "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s")!)
+            data.appendString("ProgramDerivedAddress")
+            let hashdata = data.sha256()
+            if (is_on_curve(hashdata.bytes) == 0) {
+                return SolanaPublicKey(data: hashdata)
+            }
+            i = i - 1
+        }
+        return nil
+    }
+    
+    public static func createProgramAddress(seeds: Data, programId: SolanaPublicKey) -> SolanaPublicKey? {
+        var i = 255
+        while i > 0 {
+            var data = Data()
+            data.append(seeds)
+            data.appendUInt8(UInt8(i))
+            data.appendPubKey(programId)
+            data.appendString("ProgramDerivedAddress")
+            let hashdata = data.sha256()
+            if (is_on_curve(hashdata.bytes) == 0) {
+                return SolanaPublicKey(data: hashdata)
+            }
+            i = i - 1
+        }
+        return nil
+    }
 
 }
 
