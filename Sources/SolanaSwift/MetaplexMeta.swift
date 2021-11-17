@@ -7,11 +7,11 @@
 
 import Foundation
 
-struct MetaPlexMeta {
-    var key:UInt8
-    var update_authority:SolanaPublicKey
-    var mint:SolanaPublicKey
-    var data:MetaPlexData
+public struct MetaPlexMeta {
+    public var key:UInt8
+    public var update_authority:SolanaPublicKey
+    public var mint:SolanaPublicKey
+    public var data:MetaPlexData
 }
 
 extension MetaPlexMeta: BorshCodable {
@@ -30,10 +30,10 @@ extension MetaPlexMeta: BorshCodable {
   }
 }
 
-struct MetaPlexData {
-    var name:String
-    var symbol:String
-    var uri:String
+public struct MetaPlexData {
+    public var name:String
+    public var symbol:String
+    public var uri:String
 }
 
 extension MetaPlexData: BorshCodable {
