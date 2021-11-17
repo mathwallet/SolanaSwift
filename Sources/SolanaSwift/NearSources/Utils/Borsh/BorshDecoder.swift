@@ -8,12 +8,8 @@
 import Foundation
 
 public struct BorshDecoder {
-//    public func decode<T>(_ type: T.Type, from data: Data) throws -> T where T : BorshDeserializable {
-//        var reader = BinaryReader(bytes: [UInt8](data))
-//        return try T.init(from: &reader)
-//    }
-    public func decode<T>(_ type: T.Type, from data: Data)  {
-//        var reader = BinaryReader(bytes: [UInt8](data))
-//        return try T.init(from: &reader)
+    public static func decode<T>(_ type: T.Type, from data: Data) throws -> T where T : BorshDeserializable {
+        var reader = BinaryReader(bytes: [UInt8](data))
+        return try T.init(from: &reader)
     }
 }
