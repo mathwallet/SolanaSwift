@@ -18,7 +18,7 @@ public struct BinaryReader {
 }
 
 extension BinaryReader {
-  mutating func read(count: UInt32) -> [UInt8] {
+  public mutating func read(count: UInt32) -> [UInt8] {
     let newPosition = cursor + Int(count)
     let result = bytes[cursor..<newPosition]
     cursor = newPosition
