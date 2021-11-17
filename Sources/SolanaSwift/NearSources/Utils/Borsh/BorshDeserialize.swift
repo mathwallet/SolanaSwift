@@ -8,7 +8,7 @@
 import Foundation
 
 public protocol BorshDeserializable {
-  init(from reader: inout BinaryReader) throws
+  public init(from reader: inout BinaryReader) throws
 }
 
 enum DeserializationError: Error {
@@ -16,7 +16,7 @@ enum DeserializationError: Error {
 }
 
 public extension FixedWidthInteger {
-  init(from reader: inout BinaryReader) throws {
+    public init(from reader: inout BinaryReader) throws {
     var value: Self = .zero
     let bytes = reader.read(count: UInt32(MemoryLayout<Self>.size))
     let size = withUnsafeMutableBytes(of: &value, { bytes.copyBytes(to: $0) } )
@@ -69,7 +69,7 @@ extension Bool: BorshDeserializable {
 }
 
 extension Optional where Wrapped: BorshDeserializable {
-  init(from reader: inout BinaryReader) throws {
+    public init(from reader: inout BinaryReader) throws {
     let isSomeValue: UInt8 = try .init(from: &reader)
     switch isSomeValue {
     case 1: self = try Wrapped.init(from: &reader)
