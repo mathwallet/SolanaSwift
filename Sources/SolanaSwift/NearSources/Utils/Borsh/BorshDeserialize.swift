@@ -16,7 +16,7 @@ public enum DeserializationError: Error {
 }
 
 public extension FixedWidthInteger {
-    public init(from reader: inout BinaryReader) throws {
+    init(from reader: inout BinaryReader) throws {
     var value: Self = .zero
     let bytes = reader.read(count: UInt32(MemoryLayout<Self>.size))
     let size = withUnsafeMutableBytes(of: &value, { bytes.copyBytes(to: $0) } )
