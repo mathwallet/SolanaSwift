@@ -11,7 +11,7 @@ public protocol BorshDeserializable {
     init(from reader: inout BinaryReader) throws
 }
 
-enum DeserializationError: Error {
+public enum DeserializationError: Error {
   case noData
 }
 
