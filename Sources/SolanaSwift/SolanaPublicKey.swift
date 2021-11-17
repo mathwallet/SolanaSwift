@@ -123,3 +123,15 @@ extension SolanaPublicKey: CustomStringConvertible {
     }
     
 }
+
+extension SolanaPublicKey:BorshCodable {
+    public func serialize(to writer: inout Data) throws {
+        writer.append(self.data)
+    }
+
+    public init(from reader: inout BinaryReader) throws {
+        let bytes = reader.read(count: 32)
+        self.data = Data(bytes)
+    }
+}
+
