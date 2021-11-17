@@ -8,7 +8,7 @@
 import Foundation
 
 public protocol BorshDeserializable {
-  public init(from reader: inout BinaryReader) throws
+    init(from reader: inout BinaryReader) throws
 }
 
 enum DeserializationError: Error {

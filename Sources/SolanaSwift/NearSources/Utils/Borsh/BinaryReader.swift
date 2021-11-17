@@ -8,8 +8,8 @@
 import Foundation
 
 public struct BinaryReader {
-  private var cursor: Int
-  private let bytes: [UInt8]
+  public var cursor: Int
+  public let bytes: [UInt8]
 
     public init(bytes: [UInt8]) {
     self.cursor = 0
