@@ -112,4 +112,5 @@ public struct SolanaNFTResult:Codable {
     public var image:String?
     public var description:String?
     public var name:String?
+    public var mint:String?
 }
