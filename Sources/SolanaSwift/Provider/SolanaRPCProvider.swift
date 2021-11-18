@@ -190,6 +190,7 @@ extension SolanaRPCProvider {
                     self.getMetaData(token: nftToken) { metaData in
                         self.getNft(uri: metaData.data.uri) { nftResult in
                             for _ in 0..<nftToken.amount {
+                                nftResult.mint = nftToken.mint
                                 nfts.append(nftResult)
                             }
                             group.leave()
