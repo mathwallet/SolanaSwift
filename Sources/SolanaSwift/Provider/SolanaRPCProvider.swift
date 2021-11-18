@@ -190,8 +190,7 @@ extension SolanaRPCProvider {
                     self.getMetaData(token: nftToken) { metaData in
                         self.getNft(uri: metaData.data.uri) { nftResult in
                             for _ in 0..<nftToken.amount {
-                                var newnftResult = SolanaNFTResult(_id: nftResult._id, image: nftResult.image, description: nftResult.description, name: nftResult.name, mint: nftToken.mint, symbol: nftResult.symbol)
-                                nfts.append(newnftResult)
+                                nfts.append(SolanaNFTResult(_id: nftResult._id, image: nftResult.image, description: nftResult.description, name: nftResult.name, mint: nftToken.mint, symbol: nftResult.symbol))
                             }
                             group.leave()
                         } failure: { error in
