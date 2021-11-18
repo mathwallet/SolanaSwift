@@ -163,12 +163,12 @@ extension SolanaRPCProvider {
         }
     }
     
-    func getNft(uri:String,successBlock:@escaping (_ nftResult:SolanaNFTItemResult)->Void,failure:@escaping (_ error:Error)-> Void) {
+    func getNft(uri:String,successBlock:@escaping (_ nftResult:SolanaNFTResult)->Void,failure:@escaping (_ error:Error)-> Void) {
         AF.request(uri, method: .get, parameters: nil, encoding: JSONEncoding.default, headers: nil).responseData { response in
             switch response.result {
             case .success(let data):
                 do {
-                    let result = try JSONDecoder().decode(SolanaNFTItemResult.self, from: data)
+                    let result = try JSONDecoder().decode(SolanaNFTResult.self, from: data)
                     successBlock(result)
                 } catch let e{
                     failure(e)
@@ -179,8 +179,8 @@ extension SolanaRPCProvider {
         }
     }
     
-    public func getNfts(owner:String,successBlock:@escaping (_ nftTokens:[SolanaNFTTokenResult],_ nfts:[SolanaNFTItemResult])-> Void,failure:@escaping (_ error:Error)-> Void) {
-        var nfts:[SolanaNFTItemResult] = [SolanaNFTItemResult]()
+    public func getNfts(owner:String,successBlock:@escaping (_ nftTokens:[SolanaNFTTokenResult],_ nfts:[SolanaNFTResult])-> Void,failure:@escaping (_ error:Error)-> Void) {
+        var nfts:[SolanaNFTResult] = [SolanaNFTResult]()
         self.getNFTTokensByOwner(owner: owner, programId: SolanaPublicKey.TOKENPROGRAMID.address, successBlock: { nftTokens in
             let queue = DispatchQueue(label: "solana", attributes: .concurrent)
             let group = DispatchGroup()

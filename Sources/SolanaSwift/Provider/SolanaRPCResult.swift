@@ -107,7 +107,7 @@ public struct SolanaNFTTokenResult {
     var amount:Int
 }
 
-public struct SolanaNFTItemResult:Codable {
+public struct SolanaNFTResult:Codable {
     var _id:String?
     var image:String?
     var description:String?
