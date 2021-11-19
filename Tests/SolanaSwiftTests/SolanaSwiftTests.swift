@@ -2,7 +2,6 @@ import XCTest
 import BigInt
 import CryptoSwift
 import BIP39swift
-import MetaPlexBorsh
 
 @testable import SolanaSwift
 
