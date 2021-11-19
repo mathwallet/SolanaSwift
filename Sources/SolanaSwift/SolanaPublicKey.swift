@@ -9,6 +9,7 @@ import Foundation
 import Base58Swift
 import CryptoSwift
 import CTweetNacl
+import MetaPlexBorsh
 
 
 public struct SolanaPublicKey {

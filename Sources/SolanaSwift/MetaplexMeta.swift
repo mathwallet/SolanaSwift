@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import MetaPlexBorsh
 
 public struct MetaPlexMeta {
     public var key:UInt8
