@@ -22,13 +22,14 @@ let package = Package(
         .package(url: "https://github.com/mathwallet/Base58Swift.git", from: "3.0.0"),
         .package(name: "TweetNacl", url: "https://github.com/lishuailibertine/tweetnacl-swiftwrap", from: "1.0.3"),
         .package(name:"BIP39swift", url: "https://github.com/mathwallet/BIP39swift", from: "1.0.1"),
+        .package(name:"MetaPlexBorsh", url: "https://github.com/xueyuejie/MetaPlexBorsh", from: "0.0.1"),
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
         // Targets can depend on other targets in this package, and on products in packages this package depends on.
         .target(
             name: "SolanaSwift",
-            dependencies: ["Alamofire", "BIP39swift", .product(name: "Ed25519", package: "Sr25519"), .product(name: "BIP32Swift", package: "Secp256k1Swift"), "CryptoSwift", "Base58Swift", "TweetNacl"]),
+            dependencies: ["Alamofire", "BIP39swift", .product(name: "Ed25519", package: "Sr25519"), .product(name: "BIP32Swift", package: "Secp256k1Swift"), "CryptoSwift", "Base58Swift", "TweetNacl","MetaPlexBorsh"]),
         .testTarget(
             name: "SolanaSwiftTests",
             dependencies: ["SolanaSwift"]),
