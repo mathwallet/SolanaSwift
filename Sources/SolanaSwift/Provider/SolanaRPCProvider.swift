@@ -7,6 +7,7 @@
 
 import Foundation
 import Alamofire
+import MetaPlexBorsh
 
 public struct SolanaRPCProvider {
     public struct SolanaRpcResult<T: Codable>: Codable {
