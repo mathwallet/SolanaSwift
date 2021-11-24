@@ -2,7 +2,7 @@ import XCTest
 import BigInt
 import CryptoSwift
 import BIP39swift
-
+import CTweetNacl
 @testable import SolanaSwift
 
 final class SolanaSwiftTests: XCTestCase {

@@ -96,13 +96,13 @@ public struct SolanaPublicKey {
 
 extension SolanaPublicKey {
     public static func isValidAddress(_ address: String) -> Bool{
-        guard let data = Base58.base58Decode(address) else {
+        guard let data = Base58.base58Decode(address)  else {
             return false
         }
         guard data.count == 32 else {
             return false
         }
-        guard is_on_curve(data) != 0 else {
+        guard is_on_curve(Data(data).sha256().bytes) == 0 else {
             return false
         }
         return true
