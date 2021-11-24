@@ -98,3 +98,20 @@ public struct SolanaJsonRpcError: Codable {
     public var code:Int?
     public var message:String?
 }
+
+public struct SolanaNFTTokenResult {
+    public var pubkey:String
+    public var mint:String
+    public var owner:String
+    public var FDAAddress:String
+    public var amount:Int
+}
+
+public struct SolanaNFTResult:Codable {
+    public var _id:String?
+    public var image:String?
+    public var description:String?
+    public var name:String?
+    public var mint:String?
+    public var symbol:String?
+}

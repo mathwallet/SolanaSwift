@@ -7,6 +7,7 @@
 
 import Foundation
 import Alamofire
+import MetaPlexBorsh
 
 public struct SolanaRPCProvider {
     public struct SolanaRpcResult<T: Codable>: Codable {
@@ -132,6 +133,83 @@ public struct SolanaRPCProvider {
         } failure: { error in
             failure(error)
         }
+    }
+}
+
+extension SolanaRPCProvider {
+    public func getNFTTokensByOwner(owner:String,programId:String,successBlock:@escaping (_ nftTokens:[SolanaNFTTokenResult])-> Void,failure:@escaping (_ error:Error)-> Void) {
+        self.getTokenAccountsByOwner(account: owner, programId: programId) { tokenAccounts in
+            var tokenArray:[SolanaNFTTokenResult] = [SolanaNFTTokenResult]()
+            for value in tokenAccounts.value! {
+                let amount = Int(value.account!.data!.parsed!.info!.tokenAmount!.amount!)!
+                let decimals = value.account!.data!.parsed!.info!.tokenAmount!.decimals!
+                if amount > 0 && decimals == 0 {
+                    let FDAAdddress = SolanaPublicKey.createProgramAddress( mint:SolanaPublicKey(base58String:value.account!.data!.parsed!.info!.mint!)!)
+                    let result = SolanaNFTTokenResult(pubkey: value.pubkey!, mint: value.account!.data!.parsed!.info!.mint!, owner: value.account!.data!.parsed!.info!.owner!, FDAAddress: FDAAdddress!.address,amount: amount)
+                    tokenArray.append(result)
+                }
+            }
+            successBlock(tokenArray)
+        } failure: { error in
+            failure(error)
+        }
+    }
+        
+    public func getMetaData(token:SolanaNFTTokenResult,successBlock:@escaping (_ metaData:MetaPlexMeta)->Void,failure:@escaping (_ error:Error)-> Void) {
+        self.getAccountInfo(pubkey: token.FDAAddress, encoding: "base64") { accountInfo in
+            let metaData = try! BorshDecoder.decode(MetaPlexMeta.self, from:Data(base64Encoded:(accountInfo.value?.data?.first!)!)!)
+            successBlock(metaData)
+        } failure: { error in
+            failure(error)
+        }
+    }
+    
+    func getNft(uri:String,successBlock:@escaping (_ nftResult:SolanaNFTResult)->Void,failure:@escaping (_ error:Error)-> Void) {
+        AF.request(uri, method: .get, parameters: nil, encoding: JSONEncoding.default, headers: nil).responseData { response in
+            switch response.result {
+            case .success(let data):
+                do {
+                    let result = try JSONDecoder().decode(SolanaNFTResult.self, from: data)
+                    successBlock(result)
+                } catch let e{
+                    failure(e)
+                }
+            case let .failure(e):
+                failure(e)
+            }
+        }
+    }
+    
+    public func getNfts(owner:String,successBlock:@escaping (_ nftTokens:[SolanaNFTTokenResult],_ nfts:[SolanaNFTResult])-> Void,failure:@escaping (_ error:Error)-> Void) {
+        var nfts:[SolanaNFTResult] = [SolanaNFTResult]()
+        self.getNFTTokensByOwner(owner: owner, programId: SolanaPublicKey.TOKENPROGRAMID.address, successBlock: { nftTokens in
+            let queue = DispatchQueue(label: "solana", attributes: .concurrent)
+            let group = DispatchGroup()
+            nftTokens.forEach { nftToken in
+                group.enter()
+                queue.async {
+                    self.getMetaData(token: nftToken) { metaData in
+                        self.getNft(uri: metaData.data.uri) { nftResult in
+                            for _ in 0..<nftToken.amount {
+                                nfts.append(SolanaNFTResult(_id: nftResult._id, image: nftResult.image, description: nftResult.description, name: nftResult.name, mint: nftToken.mint, symbol: nftResult.symbol))
+                            }
+                            group.leave()
+                        } failure: { error in
+                            failure(error)
+                            group.leave()
+                        }
+                    } failure: { error in
+                        failure(error)
+                        group.leave()
+                    }
+                }
+            }
+            group.notify(queue: queue, work: DispatchWorkItem(block: {
+                DispatchQueue.main.async {
+                    successBlock(nftTokens,nfts)
+                }
+            }))
+        }, failure: failure)
     }
 }
 

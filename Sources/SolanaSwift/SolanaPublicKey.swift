@@ -9,6 +9,7 @@ import Foundation
 import Base58Swift
 import CryptoSwift
 import CTweetNacl
+import MetaPlexBorsh
 
 
 public struct SolanaPublicKey {
@@ -19,7 +20,7 @@ public struct SolanaPublicKey {
     public static let ASSOCIATEDTOKENPROGRAMID = SolanaPublicKey(base58String: "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL")!
     public static let SYSVARRENTPUBKEY = SolanaPublicKey(base58String: "SysvarRent111111111111111111111111111111111")!
     public static let OWNERVALIDATIONPROGRAMID = SolanaPublicKey(base58String: "4MNPdKu9wFMvEeZBMt3Eipfs5ovVWTJb31pEXDJAAxX5")!
-    
+    public static let MATEDATAPUBLICKEY = SolanaPublicKey(base58String: "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s")!
     public var data: Data
     public var address:String {
         return Base58.base58Encode(self.data.bytes)
@@ -55,6 +56,41 @@ public struct SolanaPublicKey {
         return nil
     }
     
+    public static func createProgramAddress(mint:SolanaPublicKey) -> SolanaPublicKey? {
+        var i = 255
+        while i > 0 {
+            var data = Data()
+            data.appendString("metadata")
+            data.appendPubKey(SolanaPublicKey.MATEDATAPUBLICKEY)
+            data.appendPubKey(mint)
+            data.appendUInt8(UInt8(i))
+            data.appendPubKey(SolanaPublicKey.MATEDATAPUBLICKEY)
+            data.appendString("ProgramDerivedAddress")
+            let hashdata = data.sha256()
+            if (is_on_curve(hashdata.bytes) == 0) {
+                return SolanaPublicKey(data: hashdata)
+            }
+            i = i - 1
+        }
+        return nil
+    }
+    
+    public static func createProgramAddress(seeds: Data, programId: SolanaPublicKey) -> SolanaPublicKey? {
+        var i = 255
+        while i > 0 {
+            var data = Data()
+            data.append(seeds)
+            data.appendUInt8(UInt8(i))
+            data.appendPubKey(programId)
+            data.appendString("ProgramDerivedAddress")
+            let hashdata = data.sha256()
+            if (is_on_curve(hashdata.bytes) == 0) {
+                return SolanaPublicKey(data: hashdata)
+            }
+            i = i - 1
+        }
+        return nil
+    }
 
 }
 
@@ -88,3 +124,15 @@ extension SolanaPublicKey: CustomStringConvertible {
     }
     
 }
+
+extension SolanaPublicKey:BorshCodable {
+    public func serialize(to writer: inout Data) throws {
+        writer.append(self.data)
+    }
+
+    public init(from reader: inout BinaryReader) throws {
+        let bytes = reader.read(count: 32)
+        self.data = Data(bytes)
+    }
+}
+

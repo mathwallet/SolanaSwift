@@ -178,4 +178,5 @@ final class SolanaSwiftTests: XCTestCase {
         let str = String(data: data!, encoding: String.Encoding.utf8)
         debugPrint(str!)
     }
+    
 }
