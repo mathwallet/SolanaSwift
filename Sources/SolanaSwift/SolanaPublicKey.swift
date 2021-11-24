@@ -102,9 +102,9 @@ extension SolanaPublicKey {
         guard data.count == 32 else {
             return false
         }
-        guard is_on_curve(Data(data).sha256().bytes) == 0 else {
-            return false
-        }
+//        guard is_on_curve(Data(data).sha256().bytes) == 0 else {
+//            return false
+//        }
         return true
     }
 }
