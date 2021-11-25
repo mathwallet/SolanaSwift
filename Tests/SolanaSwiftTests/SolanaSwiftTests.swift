@@ -3,6 +3,8 @@ import BigInt
 import CryptoSwift
 import BIP39swift
 import CTweetNacl
+import Base58Swift
+
 @testable import SolanaSwift
 
 final class SolanaSwiftTests: XCTestCase {
@@ -177,6 +179,15 @@ final class SolanaSwiftTests: XCTestCase {
         let data = try? JSONSerialization.data(withJSONObject: dataarray, options: [])
         let str = String(data: data!, encoding: String.Encoding.utf8)
         debugPrint(str!)
+    }
+    
+    func testVerify() throws {
+        let data = Base58.base58Decode("5EUTDDM4RxaskE8QTtnkMEr8KvhK2k1Hif9mLeQnusAaVuVoQz4pVoHgjRfueKU5nfn1ce9a9mjT4iMw2tjtgcMa")!
+        let keypair = SolanaKeyPair(secretKey: Data(data))
+        let message = "MathWallet".data(using:.utf8)!
+        let signature = keypair.signDigest(messageDigest: message)
+        debugPrint(signature.toHexString())
+        debugPrint(keypair.verifyPublickey(message: message, signature: signature))
     }
     
 }

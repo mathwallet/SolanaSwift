@@ -123,11 +123,15 @@ public struct SolanaKeyPair {
     }
 }
 
-// MARK: - Sign
+// MARK: - Sign&Verify
 
 extension SolanaKeyPair {
     public func signDigest(messageDigest:Data) -> Data {
         return try! Ed25519KeyPair(raw:self.secretKey).sign(message: messageDigest).raw
+    }
+    
+    public func verifyPublickey(message: Data, signature: Data) -> Bool {
+        return try! Ed25519KeyPair(raw:self.secretKey).verify(message: message, signature: Ed25519Signature(raw: signature))
     }
 }
 
