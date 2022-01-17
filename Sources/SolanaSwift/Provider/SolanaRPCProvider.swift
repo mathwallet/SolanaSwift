@@ -157,8 +157,16 @@ extension SolanaRPCProvider {
         
     public func getMetaData(token:SolanaNFTTokenResult,successBlock:@escaping (_ metaData:MetaPlexMeta)->Void,failure:@escaping (_ error:Error)-> Void) {
         self.getAccountInfo(pubkey: token.FDAAddress, encoding: "base64") { accountInfo in
-            let metaData = try! BorshDecoder.decode(MetaPlexMeta.self, from:Data(base64Encoded:(accountInfo.value?.data?.first!)!)!)
-            successBlock(metaData)
+            if let value = accountInfo.value,let datas = value.data,let base64data = datas.first,let data = Data(base64Encoded: base64data) {
+                do {
+                    let metaData = try BorshDecoder.decode(MetaPlexMeta.self, from:data)
+                    successBlock(metaData)
+                } catch {
+                    failure(SolanaRpcProviderError.unknown)
+                }
+            } else {
+                failure(SolanaRpcProviderError.unknown)
+            }
         } failure: { error in
             failure(error)
         }
