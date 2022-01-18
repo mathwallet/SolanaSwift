@@ -224,7 +224,7 @@ extension SolanaRPCProvider {
     }
 }
 
-public enum SolanaRpcProviderError: Error {
+public enum SolanaRpcProviderError: LocalizedError {
     case unknown
     case server(message: String)
     public var errorDescription: String? {
