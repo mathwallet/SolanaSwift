@@ -144,8 +144,11 @@ extension SolanaRPCProvider {
                 let amount = Int(value.account!.data!.parsed!.info!.tokenAmount!.amount!)!
                 let decimals = value.account!.data!.parsed!.info!.tokenAmount!.decimals!
                 if amount > 0 && decimals == 0 {
-                    let FDAAdddress = SolanaPublicKey.createProgramAddress( mint:SolanaPublicKey(base58String:value.account!.data!.parsed!.info!.mint!)!)
-                    let result = SolanaNFTTokenResult(pubkey: value.pubkey!, mint: value.account!.data!.parsed!.info!.mint!, owner: value.account!.data!.parsed!.info!.owner!, FDAAddress: FDAAdddress!.address,amount: amount)
+                    guard let mint = SolanaPublicKey(base58String:value.account!.data!.parsed!.info!.mint!),let FDAAdddress = SolanaPublicKey.createProgramAddress( mint:mint) else {
+                        failure(SolanaRpcProviderError.unknown)
+                        return
+                    }
+                    let result = SolanaNFTTokenResult(pubkey: value.pubkey!, mint: value.account!.data!.parsed!.info!.mint!, owner: value.account!.data!.parsed!.info!.owner!, FDAAddress: FDAAdddress.address,amount: amount)
                     tokenArray.append(result)
                 }
             }
