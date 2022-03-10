@@ -29,10 +29,7 @@ public struct SolanaKeyPair {
     
     public init(seed: Data) throws {
         let ed25519KeyPair = try Ed25519KeyPair(seed: Ed25519Seed(raw: seed[0..<32]))
-        var secretKeyData = Data(ed25519KeyPair.privateRaw)
-        secretKeyData.append(ed25519KeyPair.publicKey.raw)
-        
-        self.init(secretKey: secretKeyData)
+        self.init(secretKey: ed25519KeyPair.raw)
     }
     
     public init(mnemonics: String, path: String) throws {
