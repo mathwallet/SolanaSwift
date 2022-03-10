@@ -12,7 +12,6 @@ import BigInt
 import BIP39swift
 import BIP32Swift
 
-
 public struct SolanaKeyPair {
 
     public var secretKey: Data
@@ -29,10 +28,7 @@ public struct SolanaKeyPair {
     
     public init(seed: Data) throws {
         let ed25519KeyPair = try Ed25519KeyPair(seed: Ed25519Seed(raw: seed[0..<32]))
-        var secretKeyData = Data(ed25519KeyPair.privateRaw)
-        secretKeyData.append(ed25519KeyPair.publicKey.raw)
-        
-        self.init(secretKey: secretKeyData)
+        self.init(secretKey: ed25519KeyPair.raw)
     }
     
     public init(mnemonics: String, path: String) throws {
@@ -65,42 +61,11 @@ public struct SolanaKeyPair {
     }
     
     public static func ed25519DeriveKey(path: String, seed: Data) -> (key: Data, chainCode: Data) {
-        let masterKeyData = Data(try! HMAC(key:[UInt8]("ed25519 seed".utf8), variant: .sha512).authenticate([UInt8](seed)))
-        
-        let key = masterKeyData.subdata(in:0..<32)
-        let chainCode = masterKeyData.subdata(in:32..<64)
-        
-        return self.ed25519DeriveKey(path: path, key: key, chainCode: chainCode)
+        return Ed25519KeyPair.deriveKey(path: path, seed: seed)
     }
     
     public static func ed25519DeriveKey(path: String, key: Data, chainCode: Data) -> (key: Data, chainCode: Data) {
-        let paths = path.components(separatedBy: "/")
-
-        var newKey = key
-        var newChainCode = chainCode
-        
-        for path in paths {
-            if path == "m" {
-                continue
-            }
-            var hpath:UInt32 = 0
-            if path.contains("'") {
-                let pathnum = UInt32(path.replacingOccurrences(of: "'", with: "")) ?? 0
-                hpath = pathnum + 0x80000000
-            } else {
-                hpath = UInt32(path) ?? 0
-            }
-            let pathData32 = UInt32(hpath)
-            let pathDataBE = withUnsafeBytes(of: pathData32.bigEndian, Array.init)
-            var data = Data()
-            data.append([0], count: 1)
-            data.append(newKey)
-            data.append(pathDataBE,count: 4)
-            let d = Data(try! HMAC(key: newChainCode.bytes,variant: .sha512).authenticate(data.bytes))
-            newKey = d.subdata(in: 0..<32)
-            newChainCode = d.subdata(in:32..<64)
-        }
-        return (newKey, newChainCode)
+        return Ed25519KeyPair.deriveKey(path: path, key: key, chainCode: chainCode)
     }
     
     public static func bip32DeriveKey(path: String, seed: Data) throws -> (key: Data, HDNode) {
