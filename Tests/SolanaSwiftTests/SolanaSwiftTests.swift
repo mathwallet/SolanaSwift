@@ -58,7 +58,7 @@ final class SolanaSwiftTests: XCTestCase {
         transaction.appendInstruction(instruction: assin)
         
         let keypair = try SolanaKeyPair(mnemonics: self.mnemonics, path: SolanaMnemonicPath.PathType.Ed25519.default)
-        transaction.sign(keypair: keypair)
+        try transaction.sign(keypair: keypair)
         debugPrint(transaction.serizlize().toHexString())
     }
     
@@ -183,11 +183,12 @@ final class SolanaSwiftTests: XCTestCase {
     
     func testVerify() throws {
         let data = Base58.base58Decode("5EUTDDM4RxaskE8QTtnkMEr8KvhK2k1Hif9mLeQnusAaVuVoQz4pVoHgjRfueKU5nfn1ce9a9mjT4iMw2tjtgcMa")!
-        let keypair = SolanaKeyPair(secretKey: Data(data))
+        let keypair = try SolanaKeyPair(secretKey: Data(data))
         let message = "MathWallet".data(using:.utf8)!
-        let signature = keypair.signDigest(messageDigest: message)
+        let signature = try keypair.signDigest(messageDigest: message)
+        // 959ba8de3244277188b7c0d3f6921a12afb06ff104c843692eeac43537ab889eff21a71433e559da3b3119a0bd875d8b53c83506ddaa4a76544056581acbe309
         debugPrint(signature.toHexString())
-        debugPrint(keypair.verifyPublickey(message: message, signature: signature))
+        debugPrint(keypair.signVerify(message: message, signature: signature))
     }
     
 }

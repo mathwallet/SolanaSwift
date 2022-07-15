@@ -26,18 +26,16 @@ public struct SolanaTransaction {
         return Base58.base58Encode(self.serizlize().bytes)
     }
     
-    public mutating func sign(keypair:SolanaKeyPair)  {
-        self.sign(keypair: keypair, otherPairs: [])
+    public mutating func sign(keypair:SolanaKeyPair) throws {
+        try self.sign(keypair: keypair, otherPairs: [])
     }
     
-    public mutating func sign(keypair:SolanaKeyPair,otherPairs:[SolanaKeyPair]) {
+    public mutating func sign(keypair:SolanaKeyPair, otherPairs: [SolanaKeyPair]) throws {
         let dataDigest = self.serizlize()
         self.signatures.removeAll()
-        self.signatures.append(SolanaSignature.init(data:keypair.signDigest(messageDigest: dataDigest)))
-        if !otherPairs.isEmpty {
-            for otherKeypair in otherPairs {
-                self.signatures.append(SolanaSignature.init(data:otherKeypair.signDigest(messageDigest: dataDigest)))
-            }
+        self.signatures.append(SolanaSignature.init(data:try keypair.signDigest(messageDigest: dataDigest)))
+        for otherKeypair in otherPairs {
+            self.signatures.append(SolanaSignature.init(data: try otherKeypair.signDigest(messageDigest: dataDigest)))
         }
     }
     

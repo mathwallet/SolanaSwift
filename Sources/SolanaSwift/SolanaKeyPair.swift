@@ -7,28 +7,28 @@
 
 import Foundation
 import CryptoSwift
-import Ed25519
+import TweetNacl
 import BigInt
 import BIP39swift
 import BIP32Swift
 
 public struct SolanaKeyPair {
 
-    public var secretKey: Data
     public var mnemonics: String?
     public var derivePath: String?
     
-    public var publicKey: SolanaPublicKey {
-        return SolanaPublicKey(data: secretKey.subdata(in:32..<64))
-    }
+    public var secretKey: Data
+    public var publicKey: SolanaPublicKey
 
-    public init(secretKey: Data) {
+    public init(secretKey: Data) throws {
         self.secretKey = secretKey
+        let pubKey = try NaclSign.KeyPair.keyPair(fromSecretKey: secretKey).publicKey
+        self.publicKey = SolanaPublicKey(data: pubKey)
     }
     
     public init(seed: Data) throws {
-        let ed25519KeyPair = try Ed25519KeyPair(seed: Ed25519Seed(raw: seed[0..<32]))
-        self.init(secretKey: ed25519KeyPair.raw)
+        let secretKey = try NaclSign.KeyPair.keyPair(fromSeed: seed[0..<32]).secretKey
+        try self.init(secretKey: secretKey)
     }
     
     public init(mnemonics: String, path: String) throws {
@@ -61,11 +61,11 @@ public struct SolanaKeyPair {
     }
     
     public static func ed25519DeriveKey(path: String, seed: Data) -> (key: Data, chainCode: Data) {
-        return Ed25519KeyPair.deriveKey(path: path, seed: seed)
+        return NaclSign.KeyPair.deriveKey(path: path, seed: seed)
     }
     
     public static func ed25519DeriveKey(path: String, key: Data, chainCode: Data) -> (key: Data, chainCode: Data) {
-        return Ed25519KeyPair.deriveKey(path: path, key: key, chainCode: chainCode)
+        return NaclSign.KeyPair.deriveKey(path: path, key: key, chainCode: chainCode)
     }
     
     public static func bip32DeriveKey(path: String, seed: Data) throws -> (key: Data, HDNode) {
@@ -91,12 +91,15 @@ public struct SolanaKeyPair {
 // MARK: - Sign&Verify
 
 extension SolanaKeyPair {
-    public func signDigest(messageDigest:Data) -> Data {
-        return try! Ed25519KeyPair(raw:self.secretKey).sign(message: messageDigest).raw
+    public func signDigest(messageDigest:Data) throws -> Data {
+        return try NaclSign.signDetached(message: messageDigest, secretKey: secretKey)
     }
     
-    public func verifyPublickey(message: Data, signature: Data) -> Bool {
-        return try! Ed25519KeyPair(raw:self.secretKey).verify(message: message, signature: Ed25519Signature(raw: signature))
+    public func signVerify(message: Data, signature: Data) -> Bool {
+        guard let ret = try? NaclSign.signDetachedVerify(message: message, sig: signature, publicKey: publicKey.data) else {
+            return false
+        }
+        return ret
     }
 }
 
