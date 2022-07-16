@@ -7,27 +7,14 @@
 
 import Foundation
 
-public struct SolanaInstructionAssetOwner {
-    public let destination: SolanaPublicKey
+public struct SolanaInstructionAssetOwner: SolanaInstructionBase {
+    public var promgramId: SolanaPublicKey = SolanaPublicKey.OWNERVALIDATIONPROGRAMID
+    public var signers: [SolanaSigner]
     
     public init(destination: SolanaPublicKey) {
-        self.destination = destination
-    }
-    
-    private func toData() -> Data {
-        return Data(SolanaPublicKey.OWNERPROGRAMID.data)
-    }
-}
-
-extension SolanaInstructionAssetOwner: SolanaInstructionBase {
-    public func getSigners() -> [SolanaSigner] {
-        return [
+        self.signers = [
             SolanaSigner(publicKey: destination, isSigner: false, isWritable: false)
         ]
-    }
-    
-    public func getPromgramId() -> SolanaPublicKey {
-        return SolanaPublicKey.OWNERVALIDATIONPROGRAMID
     }
 }
 
@@ -37,7 +24,11 @@ extension SolanaInstructionAssetOwner: BorshCodable {
     }
     
     public init(from reader: inout BinaryReader) throws {
-        destination = SolanaPublicKey.MEMOPROGRAMID
+        guard try SolanaPublicKey.init(from: &reader) == SolanaPublicKey.OWNERPROGRAMID else {
+            reader.cursor -= SolanaPublicKey.Size
+            throw BorshDecodingError.unknownData
+        }
+        signers = []
     }
 }
 
@@ -45,8 +36,9 @@ extension SolanaInstructionAssetOwner: SolanaHumanReadable {
     public func toHuman() -> Any {
         return [
             "type": "Asset Owner",
+            "promgramId": promgramId.address,
             "data": [
-                "destination":self.getSigners().first!.publicKey.address
+                "keys": signers.map({$0.publicKey.address})
             ]
         ]
     }

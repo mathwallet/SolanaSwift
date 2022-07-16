@@ -17,8 +17,8 @@ public enum DeserializationError: Error {
 
 extension UVarInt: BorshDeserializable {
     public init(from reader: inout BinaryReader) throws {
-        let bytes = reader.bytes[reader.cursor..<reader.bytes.count]
-        var i = 0
+        let bytes = Array(reader.bytes[reader.cursor..<reader.bytes.count])
+        var i: Int = 0
         var v: UInt32 = 0, b: UInt8 = 0, by: UInt8 = 0
         repeat {
             b = bytes[i]
@@ -27,6 +27,7 @@ extension UVarInt: BorshDeserializable {
             i += 1
         } while (b & 0x80) != 0 && by < 32
         self.value = v
+        let _ = reader.read(count: UInt32(i))
     }
 }
 
@@ -73,8 +74,8 @@ extension Optional where Wrapped: BorshDeserializable {
 
 extension String: BorshDeserializable {
     public init(from reader: inout BinaryReader) throws {
-        let count: UVarInt = try .init(from: &reader)
-        let bytes = reader.read(count: count.value)
+        let count: UInt32 = try UVarInt.init(from: &reader).value
+        let bytes = reader.read(count: count)
         guard let value = String(bytes: bytes, encoding: .utf8) else {throw DeserializationError.noData}
         self = value
     }
@@ -82,8 +83,8 @@ extension String: BorshDeserializable {
 
 extension Array: BorshDeserializable where Element: BorshDeserializable {
     public init(from reader: inout BinaryReader) throws {
-        let count: UVarInt = try .init(from: &reader)
-        self = try Array<UInt32>(0..<count.value).map {_ in try Element.init(from: &reader) }
+        let count: UInt32 = try UVarInt.init(from: &reader).value
+        self = try Array<UInt32>(0..<count).map {_ in try Element.init(from: &reader) }
     }
 }
 
@@ -95,8 +96,8 @@ extension Set: BorshDeserializable where Element: BorshDeserializable & Equatabl
 
 extension Dictionary: BorshDeserializable where Key: BorshDeserializable & Equatable, Value: BorshDeserializable {
     public init(from reader: inout BinaryReader) throws {
-        let count: UVarInt = try .init(from: &reader)
-        let keyValuePairs = try Array<UInt32>(0..<count.value).map {_ in (try Key.init(from: &reader), try Value.init(from: &reader)) }
+        let count: UInt32 = try UVarInt.init(from: &reader).value
+        let keyValuePairs = try Array<UInt32>(0..<count).map {_ in (try Key.init(from: &reader), try Value.init(from: &reader)) }
         self = Dictionary(uniqueKeysWithValues: keyValuePairs)
     }
 }

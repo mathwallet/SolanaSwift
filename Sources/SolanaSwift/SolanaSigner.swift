@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct SolanaSigner {
+public struct SolanaSigner: CustomStringConvertible {
     
     public var publicKey: SolanaPublicKey
     public var isSigner: Bool = false
@@ -18,15 +18,13 @@ public struct SolanaSigner {
         self.isSigner = isSigner
         self.isWritable = isWritable
     }
-}
-
-extension SolanaSigner: BorshCodable {
-    public func serialize(to writer: inout Data) throws {
-        try publicKey.serialize(to: &writer)
-    }
-
-    public init(from reader: inout BinaryReader) throws {
-        try publicKey = .init(from: &reader)
+    
+    public var description: String {
+        return """
+            PublicKey : \(publicKey.address)
+            isSigner : \(isSigner)
+            isWritable : \(isWritable)
+        """
     }
 }
 

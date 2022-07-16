@@ -8,28 +8,17 @@
 import Foundation
 import BigInt
 
-public struct SolanaInstructionTransfer {
-    public let from: SolanaPublicKey
-    public let to: SolanaPublicKey
-    public let lamports: BigUInt
+public struct SolanaInstructionTransfer: SolanaInstructionBase {
+    public var promgramId: SolanaPublicKey = SolanaPublicKey.OWNERPROGRAMID
+    public var signers: [SolanaSigner]
+    private let lamports: BigUInt
     
     public init(from: SolanaPublicKey, to: SolanaPublicKey, lamports: BigUInt) {
-        self.from = from
-        self.to = to
-        self.lamports = lamports
-    }
-}
-
-extension SolanaInstructionTransfer: SolanaInstructionBase {
-    public func getSigners() -> [SolanaSigner] {
-        return [
+        self.signers = [
             SolanaSigner(publicKey: from, isSigner: true, isWritable: true),
             SolanaSigner(publicKey: to, isSigner: false, isWritable: true)
         ]
-    }
-    
-    public func getPromgramId() -> SolanaPublicKey {
-        return SolanaPublicKey.OWNERPROGRAMID
+        self.lamports = lamports
     }
 }
 
@@ -41,9 +30,13 @@ extension SolanaInstructionTransfer: BorshCodable {
     }
     
     public init(from reader: inout BinaryReader) throws {
-        from = SolanaPublicKey.MEMOPROGRAMID
-        to = SolanaPublicKey.MEMOPROGRAMID
-        lamports = BigUInt(0)
+        // Instruction Type
+        guard try UInt32.init(from: &reader)  == 2 else {
+            reader.cursor -= MemoryLayout<UInt32>.size
+            throw BorshDecodingError.unknownData
+        }
+        signers = []
+        lamports = BigUInt(try UInt64.init(from: &reader))
     }
 }
 
@@ -51,9 +44,9 @@ extension SolanaInstructionTransfer: SolanaHumanReadable {
     public func toHuman() -> Any {
         return [
             "type": "Transfer",
+            "promgramId": promgramId.address,
             "data": [
-                "from":from.address,
-                "to": to.address,
+                "keys": signers.map({$0.publicKey.address}),
                 "lamports": lamports.description
             ]
         ]

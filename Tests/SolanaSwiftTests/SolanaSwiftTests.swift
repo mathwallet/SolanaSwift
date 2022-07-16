@@ -33,18 +33,18 @@ final class SolanaSwiftTests: XCTestCase {
             mint: SolanaPublicKey(base58String: "GeDS162t9yGJuLEHPWXXGrb1zwkzinCgRwnT8vHYjKza")!
         )
         var transaction = SolanaTransaction()
+        transaction.recentBlockhash = SolanaBlockHash(base58String: "9h5dnhmz3vwL25RZ699ZGV7j1NvJ3C2HhPQPcjtDaqcH")!
         transaction.appendInstruction(instruction: transferInstruction)
         transaction.appendInstruction(instruction: associatedInstruction)
         
         let keypair = try SolanaKeyPair(mnemonics: self.mnemonics, path: SolanaMnemonicPath.PathType.Ed25519.default)
         let signedTransaction = try transaction.sign(keypair: keypair)
-        debugPrint(try BorshEncoder().encode(signedTransaction).toHexString())
         
-        XCTAssertEqual(try BorshEncoder().encode(signedTransaction).toHexString(), "0193dcdb584cfedc88a8ea59d5c90e034af36272116a5af1f0f9f824d2ad0d77e456c1f2ea8b11e5ff11f63d590e4e8e45fc8a9d5fdec319b3e010bc2f17c9da0401000609b2d70c003063053412e81ef8386be56719e03425fdce04fc8b6b70a139df139ce47c4c5496c9385a7b147c0771976f1b1d78be5f35bfd29aca33260d9e731730af52f0d3bb38368a2d7ea17db4bf34393155113a0a3384f9115cc2968c808e20316e510e603bf1ce2c4c06aac011a8f299415a91823b27843e471bdf68c03504e867d9845930950c31c76e1573a82de99b91eac9d2ee95eb9b29a722e1db1bd3000000000000000000000000000000000000000000000000000000000000000006ddf6e1d765a193d9cbe146ceeb79ac1cb485ed5f5b37913a8cf5857eff00a906a7d517192c5c51218cc94c3d4af17f58daee089ba1fd44e3dbd98a000000008c97258f4e2489f1bb3d1029148e0d830b5a1399daff1084048e7bd8dbe9f85902050200010c02000000881300000000000008070002030405060700")
+        let encodeData = try BorshEncoder().encode(signedTransaction)
+        XCTAssertEqual(encodeData.toHexString(), "01787dd2fd534bbe44e9b4df5e94fe45abe9bd5fbc4194c00084eae20c67beb4fbca0b233e38dde7e3c0373f2501c78b27a7999b90f0bac69f6ae830a12414bb0801000609b2d70c003063053412e81ef8386be56719e03425fdce04fc8b6b70a139df139ce47c4c5496c9385a7b147c0771976f1b1d78be5f35bfd29aca33260d9e731730af52f0d3bb38368a2d7ea17db4bf34393155113a0a3384f9115cc2968c808e20316e510e603bf1ce2c4c06aac011a8f299415a91823b27843e471bdf68c03504e867d9845930950c31c76e1573a82de99b91eac9d2ee95eb9b29a722e1db1bd3000000000000000000000000000000000000000000000000000000000000000006ddf6e1d765a193d9cbe146ceeb79ac1cb485ed5f5b37913a8cf5857eff00a906a7d517192c5c51218cc94c3d4af17f58daee089ba1fd44e3dbd98a000000008c97258f4e2489f1bb3d1029148e0d830b5a1399daff1084048e7bd8dbe9f8598121f7bf81d0a9a955ebf510df653b22672e985c55c69f8e4f2b95e8a398a38602050200010c02000000881300000000000008070002030405060700")
         
-        let encoder = BorshEncoder()
-        let encodeData = try encoder.encode(transaction)
-        debugPrint(encodeData.toHexString())
+        let decodedSignedTransaction = try BorshDecoder.decode(SolanaSignedTransaction.self, from: encodeData)
+        debugPrint(decodedSignedTransaction.toHuman())
     }
     
     
@@ -122,14 +122,16 @@ final class SolanaSwiftTests: XCTestCase {
     }
     
     func testSerializeExample() throws {
-        var data = Data()
-        data.appendVarInt(1600)
-        debugPrint(data.toHexString())
+        let pubKey1 = SolanaPublicKey.newAssociatedToken(pubkey: SolanaPublicKey(base58String: "D37m1SKWnyY4fmhEntD84uZpjejUZkbHQUBEP3X74LuH")!, mint: SolanaPublicKey(base58String: "GeDS162t9yGJuLEHPWXXGrb1zwkzinCgRwnT8vHYjKza")!)
+        XCTAssertEqual(pubKey1?.address, "Ge1qcAEw2RTXwXnuhnkJHw2cMF3sbwXKFab9F145uAgz")
         
-        let v = UVarInt(1600)
-        let encoder = try BorshEncoder().encode(v)
-        debugPrint(encoder.toHexString())
+        let pubKey2 = SolanaPublicKey.createProgramAddress(mint: SolanaPublicKey(base58String: "GeDS162t9yGJuLEHPWXXGrb1zwkzinCgRwnT8vHYjKza")!)
+        XCTAssertEqual(pubKey2?.address, "45UY8D4hSTskzkLCqyDM3P7iouQyAVB58y4WRaaXCa9p")
+        
+        let pubKey3 = SolanaPublicKey.createProgramAddress(seeds: Data(hex: "666666"), programId: SolanaPublicKey(base58String: "GeDS162t9yGJuLEHPWXXGrb1zwkzinCgRwnT8vHYjKza")!)
+        XCTAssertEqual(pubKey3?.address, "3RK5TQt2h13mLrr5Jypzjh39HmBGoe6ybZwXxatskBwr")
     }
+    
     func testToHuman() throws {
         let from = SolanaPublicKey(base58String: "D37m1SKWnyY4fmhEntD84uZpjejUZkbHQUBEP3X74LuH")!
         let to = SolanaPublicKey(base58String: "EY2kNS5hKfxxLSkbaBMQtQuHYYbjyYk6Ai2phcGMNgpC")!

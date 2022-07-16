@@ -7,7 +7,6 @@
 
 import Foundation
 import Alamofire
-import MetaPlexBorsh
 
 public struct SolanaRPCProvider {
     public struct SolanaRpcResult<T: Codable>: Codable {
@@ -144,7 +143,7 @@ extension SolanaRPCProvider {
                 let amount = Int(value.account!.data!.parsed!.info!.tokenAmount!.amount!)!
                 let decimals = value.account!.data!.parsed!.info!.tokenAmount!.decimals!
                 if amount > 0 && decimals == 0 {
-                    guard let mint = SolanaPublicKey(base58String:value.account!.data!.parsed!.info!.mint!),let FDAAdddress = SolanaPublicKey.createProgramAddress( mint:mint) else {
+                    guard let mint = SolanaPublicKey(base58String:value.account!.data!.parsed!.info!.mint!),let FDAAdddress = SolanaPublicKey.createProgramAddress(mint:mint) else {
                         failure(SolanaRpcProviderError.unknown)
                         return
                     }

@@ -8,31 +8,19 @@
 import Foundation
 import BigInt
 
-public struct SolanaInstructionToken {
-    public let tokenPub: SolanaPublicKey
-    public let destination: SolanaPublicKey
-    public let owner: SolanaPublicKey
+public struct SolanaInstructionToken: SolanaInstructionBase {
+    public let promgramId: SolanaPublicKey = SolanaPublicKey.TOKENPROGRAMID
+    public var signers: [SolanaSigner]
+    
     public let lamports: BigUInt
 
     public init(tokenPub: SolanaPublicKey, destination: SolanaPublicKey, owner: SolanaPublicKey, lamports: BigUInt) {
-        self.tokenPub = tokenPub
-        self.destination = destination
-        self.owner = owner
-        self.lamports = lamports
-    }
-}
-
-extension SolanaInstructionToken: SolanaInstructionBase {
-    public func getPromgramId() -> SolanaPublicKey {
-        return SolanaPublicKey.TOKENPROGRAMID
-    }
-    
-    public func getSigners() -> [SolanaSigner] {
-        return [
+        self.signers = [
             SolanaSigner(publicKey: tokenPub, isSigner: false, isWritable: true),
             SolanaSigner(publicKey: destination, isSigner: false, isWritable: true),
             SolanaSigner(publicKey: owner, isSigner: true, isWritable: true)
         ]
+        self.lamports = lamports
     }
 }
 
@@ -44,10 +32,13 @@ extension SolanaInstructionToken: BorshCodable {
     }
     
     public init(from reader: inout BinaryReader) throws {
-        tokenPub = SolanaPublicKey.MEMOPROGRAMID
-        destination = SolanaPublicKey.MEMOPROGRAMID
-        owner = SolanaPublicKey.MEMOPROGRAMID
-        lamports = BigUInt(0)
+        // Instruction Type
+        guard try UInt8.init(from: &reader)  == 3 else {
+            reader.cursor -= MemoryLayout<UInt8>.size
+            throw BorshDecodingError.unknownData
+        }
+        signers = []
+        lamports = BigUInt(try UInt64.init(from: &reader))
     }
 }
 
@@ -56,10 +47,9 @@ extension SolanaInstructionToken: SolanaHumanReadable {
     public func toHuman() -> Any {
         return [
             "type": "Transfer Token",
+            "promgramId": promgramId.address,
             "data": [
-                "tokenPub": tokenPub.address,
-                "destination": destination.address,
-                "owner": owner.address,
+                "keys": signers.map({$0.publicKey.address}),
                 "lamports": lamports.description
             ]
         ]

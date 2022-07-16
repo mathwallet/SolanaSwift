@@ -7,23 +7,12 @@
 
 import Foundation
 
-public struct SolanaInstructionAssociatedAccount {
-    public let from: SolanaPublicKey
-    public let to: SolanaPublicKey
-    public let associatedToken: SolanaPublicKey
-    public let mint: SolanaPublicKey
+public struct SolanaInstructionAssociatedAccount: SolanaInstructionBase {
+    public var promgramId: SolanaPublicKey = SolanaPublicKey.ASSOCIATEDTOKENPROGRAMID
+    public var signers: [SolanaSigner]
     
     public init(from: SolanaPublicKey, to: SolanaPublicKey, associatedToken: SolanaPublicKey, mint: SolanaPublicKey) {
-        self.from = from
-        self.to = to
-        self.associatedToken = associatedToken
-        self.mint = mint
-    }
-}
-
-extension SolanaInstructionAssociatedAccount: SolanaInstructionBase {
-    public func getSigners() -> [SolanaSigner] {
-        return [
+        self.signers = [
             SolanaSigner(publicKey: from, isSigner: true, isWritable: true),
             SolanaSigner(publicKey: associatedToken, isSigner: false, isWritable: true),
             SolanaSigner(publicKey: to),
@@ -33,10 +22,6 @@ extension SolanaInstructionAssociatedAccount: SolanaInstructionBase {
             SolanaSigner(publicKey: SolanaPublicKey.SYSVARRENTPUBKEY)
         ]
     }
-    
-    public func getPromgramId() -> SolanaPublicKey {
-        return SolanaPublicKey.ASSOCIATEDTOKENPROGRAMID
-    }
 }
 
 extension SolanaInstructionAssociatedAccount: BorshCodable {
@@ -44,10 +29,7 @@ extension SolanaInstructionAssociatedAccount: BorshCodable {
     }
     
     public init(from reader: inout BinaryReader) throws {
-        from = SolanaPublicKey.MEMOPROGRAMID
-        to = SolanaPublicKey.MEMOPROGRAMID
-        associatedToken = SolanaPublicKey.MEMOPROGRAMID
-        mint = SolanaPublicKey.MEMOPROGRAMID
+        signers = []
     }
 }
 
@@ -55,12 +37,8 @@ extension SolanaInstructionAssociatedAccount: SolanaHumanReadable {
     public func toHuman() -> Any {
         return [
             "type": "Associated Account",
-            "data": [
-                "from": from.address,
-                "to": to.address,
-                "associatedToken": associatedToken.address,
-                "mint": mint.address
-            ]
+            "promgramId": promgramId.address,
+            "data": signers.map({$0.publicKey.address})
         ]
     }
 }
