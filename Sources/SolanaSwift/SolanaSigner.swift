@@ -20,6 +20,16 @@ public struct SolanaSigner {
     }
 }
 
+extension SolanaSigner: BorshCodable {
+    public func serialize(to writer: inout Data) throws {
+        try publicKey.serialize(to: &writer)
+    }
+
+    public init(from reader: inout BinaryReader) throws {
+        try publicKey = .init(from: &reader)
+    }
+}
+
 extension SolanaSigner: Equatable {
     public static func == (lhs: SolanaSigner, rhs: SolanaSigner) -> Bool {
         return lhs.publicKey == rhs.publicKey

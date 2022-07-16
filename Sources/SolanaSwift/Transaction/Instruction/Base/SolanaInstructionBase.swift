@@ -8,9 +8,6 @@
 import Foundation
 
 public protocol SolanaInstructionBase {
-    var promgramId: SolanaPublicKey{ get set }
-    var signers: [SolanaSigner]{ get set }
-    var data: Data{ get set }
-    
-    init?(promgramId: SolanaPublicKey, signers: [SolanaSigner], data: Data)
+    func getPromgramId() -> SolanaPublicKey
+    func getSigners() -> [SolanaSigner]
 }

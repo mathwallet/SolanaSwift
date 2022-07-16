@@ -8,53 +8,60 @@
 import Foundation
 import BigInt
 
-public struct SolanaInstructionToken: SolanaInstructionBase {
-    public var promgramId: SolanaPublicKey = SolanaPublicKey.TOKENPROGRAMID
-    
-    public var signers = [SolanaSigner]()
-    
-    public var data = Data()
-    
-    
-    public init?(promgramId: SolanaPublicKey, signers: [SolanaSigner], data: Data) {
-        self.promgramId = promgramId
-        self.signers = signers
-        self.data = data
-    }
-    
+public struct SolanaInstructionToken {
+    public let tokenPub: SolanaPublicKey
+    public let destination: SolanaPublicKey
+    public let owner: SolanaPublicKey
+    public let lamports: BigUInt
+
     public init(tokenPub: SolanaPublicKey, destination: SolanaPublicKey, owner: SolanaPublicKey, lamports: BigUInt) {
-        self.signers.append(SolanaSigner(publicKey: tokenPub, isSigner: false, isWritable: true))
-        self.signers.append(SolanaSigner(publicKey: destination, isSigner: false, isWritable: true))
-        self.signers.append(SolanaSigner(publicKey: owner, isSigner: true, isWritable: true))
-        
-        self.data = toData(lamports: lamports)
-    }
-    
-    private func toData(lamports: BigUInt) -> Data {
-        var data = Data()
-        // Instruction Type
-        data.appendUInt8(3)
-        data.appendUInt64(UInt64(lamports.description)!)
-        return data
+        self.tokenPub = tokenPub
+        self.destination = destination
+        self.owner = owner
+        self.lamports = lamports
     }
 }
 
+extension SolanaInstructionToken: SolanaInstructionBase {
+    public func getPromgramId() -> SolanaPublicKey {
+        return SolanaPublicKey.TOKENPROGRAMID
+    }
+    
+    public func getSigners() -> [SolanaSigner] {
+        return [
+            SolanaSigner(publicKey: tokenPub, isSigner: false, isWritable: true),
+            SolanaSigner(publicKey: destination, isSigner: false, isWritable: true),
+            SolanaSigner(publicKey: owner, isSigner: true, isWritable: true)
+        ]
+    }
+}
+
+extension SolanaInstructionToken: BorshCodable {
+    public func serialize(to writer: inout Data) throws {
+        // Instruction Type
+        try UInt8(3).serialize(to: &writer)
+        try UInt64(lamports.description)!.serialize(to: &writer)
+    }
+    
+    public init(from reader: inout BinaryReader) throws {
+        tokenPub = SolanaPublicKey.MEMOPROGRAMID
+        destination = SolanaPublicKey.MEMOPROGRAMID
+        owner = SolanaPublicKey.MEMOPROGRAMID
+        lamports = BigUInt(0)
+    }
+}
+
+
 extension SolanaInstructionToken: SolanaHumanReadable {
-    public func toHuman() -> Dictionary<String, Any> {
-        var dataDic:[String:String] = [String:String]()
-        for i in 0..<self.signers.count {
-            let signer = self.signers[i]
-            if signer.isSigner {
-                dataDic["owner"] = signer.publicKey.address
-                continue
-            }
-            dataDic["pubkey\(i)"] = signer.publicKey.address
-        }
-        let lamports = self.data.readUInt64(at: 1)
-        dataDic["lamports"] = "\(lamports)"
+    public func toHuman() -> Any {
         return [
             "type": "Transfer Token",
-            "data": dataDic
+            "data": [
+                "tokenPub": tokenPub.address,
+                "destination": destination.address,
+                "owner": owner.address,
+                "lamports": lamports.description
+            ]
         ]
     }
 }

@@ -16,19 +16,19 @@ public struct MetaPlexMeta {
 }
 
 extension MetaPlexMeta: BorshCodable {
-  public func serialize(to writer: inout Data) throws {
-    try key.serialize(to: &writer)
-    try update_authority.serialize(to: &writer)
-    try mint.serialize(to: &writer)
-    try data.serialize(to: &writer)
-  }
+    public func serialize(to writer: inout Data) throws {
+        try key.serialize(to: &writer)
+        try update_authority.serialize(to: &writer)
+        try mint.serialize(to: &writer)
+        try data.serialize(to: &writer)
+    }
 
-  public init(from reader: inout BinaryReader) throws {
-    self.key = try .init(from: &reader)
-    self.update_authority = try .init(from: &reader)
-    self.mint = try .init(from: &reader)
-    self.data = try .init(from: &reader)
-  }
+    public init(from reader: inout BinaryReader) throws {
+        self.key = try .init(from: &reader)
+        self.update_authority = try .init(from: &reader)
+        self.mint = try .init(from: &reader)
+        self.data = try .init(from: &reader)
+    }
 }
 
 public struct MetaPlexData {

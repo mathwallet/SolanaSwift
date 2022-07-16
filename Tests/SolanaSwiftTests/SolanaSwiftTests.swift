@@ -20,46 +20,31 @@ final class SolanaSwiftTests: XCTestCase {
         XCTAssertNotNil(key.publicKey)
     }
     
-    func testDataExample() throws {
-        var data =  Data()
-        data.appendUInt8(1)
-        XCTAssertTrue(data.toHexString() == "01")
-        
-        var data1 =  Data()
-        data1.appendUInt16(1)
-        XCTAssertTrue(data1.toHexString() == "0100")
-        
-        var data2 =  Data()
-        data2.appendUInt32(1)
-        XCTAssertTrue(data2.toHexString() == "01000000")
-        
-        var data3 =  Data()
-        data3.appendUInt64(1)
-        XCTAssertTrue(data3.toHexString() == "0100000000000000")
-    }
-    
-    func testDataAdvanceExample() throws {
-        var data =  Data()
-        data.appendVarInt(1291)
-        debugPrint(data.toHexString())
-    }
-    
     func testTrasaction()  throws {
-        let instru = SolanaInstructionTransfer(from: SolanaPublicKey(base58String: "D37m1SKWnyY4fmhEntD84uZpjejUZkbHQUBEP3X74LuH")! , to:SolanaPublicKey(base58String: "GNutLCXQEEcmxkJH5f5rw51bTW2QcLGXqitmN3EaVPoV")!, lamports: BigUInt(5000))
-        
-        debugPrint(instru.promgramId.address)
-        debugPrint(instru.signers)
-        debugPrint(instru.data.toHexString())
-        debugPrint(instru.toHuman())
-        
-        let assin = SolanaInstructionAssociatedAccount(from: SolanaPublicKey(base58String: "D37m1SKWnyY4fmhEntD84uZpjejUZkbHQUBEP3X74LuH")!, to:  SolanaPublicKey(base58String: "4KxYRXTZ4PXXDCvaQeG75HLJFdKrwVY6bX5nckp8jpHh")!, associatedToken: SolanaPublicKey(base58String: "CoPhcr5DrGZx6a3pbB2BmrTHjNAokZScQVUdyqCNWyRR")!, mint: SolanaPublicKey(base58String: "GeDS162t9yGJuLEHPWXXGrb1zwkzinCgRwnT8vHYjKza")!)
+        let transferInstruction = SolanaInstructionTransfer(
+            from: SolanaPublicKey(base58String: "D37m1SKWnyY4fmhEntD84uZpjejUZkbHQUBEP3X74LuH")! ,
+            to:SolanaPublicKey(base58String: "GNutLCXQEEcmxkJH5f5rw51bTW2QcLGXqitmN3EaVPoV")!,
+            lamports: BigUInt(5000)
+        )
+        let associatedInstruction = SolanaInstructionAssociatedAccount(
+            from: SolanaPublicKey(base58String: "D37m1SKWnyY4fmhEntD84uZpjejUZkbHQUBEP3X74LuH")!,
+            to:  SolanaPublicKey(base58String: "4KxYRXTZ4PXXDCvaQeG75HLJFdKrwVY6bX5nckp8jpHh")!,
+            associatedToken: SolanaPublicKey(base58String: "CoPhcr5DrGZx6a3pbB2BmrTHjNAokZScQVUdyqCNWyRR")!,
+            mint: SolanaPublicKey(base58String: "GeDS162t9yGJuLEHPWXXGrb1zwkzinCgRwnT8vHYjKza")!
+        )
         var transaction = SolanaTransaction()
-        transaction.appendInstruction(instruction: instru)
-        transaction.appendInstruction(instruction: assin)
+        transaction.appendInstruction(instruction: transferInstruction)
+        transaction.appendInstruction(instruction: associatedInstruction)
         
         let keypair = try SolanaKeyPair(mnemonics: self.mnemonics, path: SolanaMnemonicPath.PathType.Ed25519.default)
-        try transaction.sign(keypair: keypair)
-        debugPrint(transaction.serizlize().toHexString())
+        let signedTransaction = try transaction.sign(keypair: keypair)
+        debugPrint(try BorshEncoder().encode(signedTransaction).toHexString())
+        
+        XCTAssertEqual(try BorshEncoder().encode(signedTransaction).toHexString(), "0193dcdb584cfedc88a8ea59d5c90e034af36272116a5af1f0f9f824d2ad0d77e456c1f2ea8b11e5ff11f63d590e4e8e45fc8a9d5fdec319b3e010bc2f17c9da0401000609b2d70c003063053412e81ef8386be56719e03425fdce04fc8b6b70a139df139ce47c4c5496c9385a7b147c0771976f1b1d78be5f35bfd29aca33260d9e731730af52f0d3bb38368a2d7ea17db4bf34393155113a0a3384f9115cc2968c808e20316e510e603bf1ce2c4c06aac011a8f299415a91823b27843e471bdf68c03504e867d9845930950c31c76e1573a82de99b91eac9d2ee95eb9b29a722e1db1bd3000000000000000000000000000000000000000000000000000000000000000006ddf6e1d765a193d9cbe146ceeb79ac1cb485ed5f5b37913a8cf5857eff00a906a7d517192c5c51218cc94c3d4af17f58daee089ba1fd44e3dbd98a000000008c97258f4e2489f1bb3d1029148e0d830b5a1399daff1084048e7bd8dbe9f85902050200010c02000000881300000000000008070002030405060700")
+        
+        let encoder = BorshEncoder()
+        let encodeData = try encoder.encode(transaction)
+        debugPrint(encodeData.toHexString())
     }
     
     
@@ -76,8 +61,6 @@ final class SolanaSwiftTests: XCTestCase {
         // 排序
         tempSigners = tempSigners.sorted(by: >)
         
-        debugPrint(tempSigners)
-        
         // 去重
         var signers = [SolanaSigner]()
         for signer in tempSigners {
@@ -86,7 +69,9 @@ final class SolanaSwiftTests: XCTestCase {
             }
         }
 
-        debugPrint(signers)
+        XCTAssertEqual(signers[0].publicKey.address, "GNutLCXQEEcmxkJH5f5rw51bTW2QcLGXqitmN3EaVPoV")
+        XCTAssertEqual(signers[1].publicKey.address, "D37m1SKWnyY4fmhEntD84uZpjejUZkbHQUBEP3X74LuH")
+        XCTAssertEqual(signers[2].publicKey.address, "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA")
     }
     
     func testImportKeyPair() throws {
@@ -136,49 +121,22 @@ final class SolanaSwiftTests: XCTestCase {
         XCTAssert(key.toHexString() == key2.toHexString())
     }
     
-    func testDecodeExample() throws {
+    func testSerializeExample() throws {
         var data = Data()
-        data.appendUInt8(10)
-        data.appendUInt16(10)
-        data.appendUInt32(120)
-        data.appendUInt64(10)
-        data.appendVarInt(288)
-        data.appendUInt8(1)
-        
+        data.appendVarInt(1600)
         debugPrint(data.toHexString())
         
-        let data2 = Data(hex: "0a0a00780000000a00000000000000a00201")
-        var index = 0
-        debugPrint(data2.readUInt8(at: index))
-        index = index + 1
-        
-        debugPrint(data2.readUInt16(at: index))
-        index = index + 2
-        
-        debugPrint(data2.readUInt32(at: index))
-        index = index + 4
-        
-        debugPrint(data2.readUInt64(at: index))
-        index = index + 8
-        
-        var length: Int = 0
-        debugPrint(data2.readVarInt(at: index, length: &length))
-        index = index + length
-        
-        debugPrint(data2.readUInt8(at: index))
-        
-        
-        
+        let v = UVarInt(1600)
+        let encoder = try BorshEncoder().encode(v)
+        debugPrint(encoder.toHexString())
     }
     func testToHuman() throws {
-        let array:[SolanaSigner] = [SolanaSigner(publicKey: SolanaPublicKey(base58String: "D37m1SKWnyY4fmhEntD84uZpjejUZkbHQUBEP3X74LuH")!,isSigner: true,isWritable: true),SolanaSigner(publicKey: SolanaPublicKey(base58String: "EY2kNS5hKfxxLSkbaBMQtQuHYYbjyYk6Ai2phcGMNgpC")!,isSigner: false,isWritable: true),SolanaSigner(publicKey: SolanaPublicKey(base58String: "DcaWQQGErxtzTTph7r5xWMxEvWEywGahtjnRvoJPN9Vz")!)]
-        let instruction = SolanaInstructionTransfer(promgramId: SolanaPublicKey(base58String: "TokenwAJbNbGKPFXCWuBvf9Ss623VQ5DA")!, signers: array, data: Data(hex: "0x02000000a08601000000000002000000a086010000000000"))
-        
-        let dataDic:Dictionary = instruction!.toHuman()
-        let dataarray = dataDic["data"] as! Dictionary<String, Any>
-        let data = try? JSONSerialization.data(withJSONObject: dataarray, options: [])
-        let str = String(data: data!, encoding: String.Encoding.utf8)
-        debugPrint(str!)
+        let from = SolanaPublicKey(base58String: "D37m1SKWnyY4fmhEntD84uZpjejUZkbHQUBEP3X74LuH")!
+        let to = SolanaPublicKey(base58String: "EY2kNS5hKfxxLSkbaBMQtQuHYYbjyYk6Ai2phcGMNgpC")!
+        let lamports = BigUInt(1)
+        let instruction = SolanaInstructionTransfer(from: from, to: to, lamports: lamports)
+        let dataDic = instruction.toHuman()
+        debugPrint(dataDic)
     }
     
     func testVerify() throws {
@@ -187,7 +145,7 @@ final class SolanaSwiftTests: XCTestCase {
         let message = "MathWallet".data(using:.utf8)!
         let signature = try keypair.signDigest(messageDigest: message)
         // 959ba8de3244277188b7c0d3f6921a12afb06ff104c843692eeac43537ab889eff21a71433e559da3b3119a0bd875d8b53c83506ddaa4a76544056581acbe309
-        debugPrint(signature.toHexString())
+        XCTAssertEqual(signature.toHexString(), "959ba8de3244277188b7c0d3f6921a12afb06ff104c843692eeac43537ab889eff21a71433e559da3b3119a0bd875d8b53c83506ddaa4a76544056581acbe309")
         debugPrint(keypair.signVerify(message: message, signature: signature))
     }
     

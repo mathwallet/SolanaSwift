@@ -102,9 +102,6 @@ extension SolanaPublicKey {
         guard data.count == 32 else {
             return false
         }
-//        guard is_on_curve(Data(data).sha256().bytes) == 0 else {
-//            return false
-//        }
         return true
     }
 }
@@ -118,11 +115,9 @@ extension SolanaPublicKey: Equatable {
 }
 
 extension SolanaPublicKey: CustomStringConvertible {
-    
     public var description: String {
         return self.address
     }
-    
 }
 
 extension SolanaPublicKey:BorshCodable {
@@ -131,8 +126,7 @@ extension SolanaPublicKey:BorshCodable {
     }
 
     public init(from reader: inout BinaryReader) throws {
-        let bytes = reader.read(count: 32)
-        self.data = Data(bytes)
+        self.data = Data(reader.read(count: 32))
     }
 }
 

@@ -9,7 +9,7 @@ import Foundation
 import Base58Swift
 
 public struct SolanaSignature {
-    public var data: Data
+    public let data: Data
     
     public init(data: Data){
         self.data = data
@@ -24,5 +24,15 @@ public struct SolanaSignature {
     
     public func base58Sting() -> String {
         return Base58.base58Encode(self.data.bytes)
+    }
+}
+
+extension SolanaSignature: BorshCodable {
+    public func serialize(to writer: inout Data) throws {
+        writer.append(data)
+    }
+
+    public init(from reader: inout BinaryReader) throws {
+        self.data = Data(reader.read(count: 64))
     }
 }

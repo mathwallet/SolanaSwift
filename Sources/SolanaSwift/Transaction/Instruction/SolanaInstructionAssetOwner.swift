@@ -7,23 +7,11 @@
 
 import Foundation
 
-public struct SolanaInstructionAssetOwner: SolanaInstructionBase {
-    
-    public var promgramId: SolanaPublicKey = SolanaPublicKey.OWNERVALIDATIONPROGRAMID
-    
-    public var signers = [SolanaSigner]()
-    
-    public var data = Data()
-    
-    public init?(promgramId: SolanaPublicKey, signers: [SolanaSigner], data: Data) {
-        self.promgramId = promgramId
-        self.signers = signers
-        self.data = data
-    }
+public struct SolanaInstructionAssetOwner {
+    public let destination: SolanaPublicKey
     
     public init(destination: SolanaPublicKey) {
-        self.signers.append(SolanaSigner(publicKey: destination, isSigner: false, isWritable: false))
-        self.data = toData()
+        self.destination = destination
     }
     
     private func toData() -> Data {
@@ -31,14 +19,35 @@ public struct SolanaInstructionAssetOwner: SolanaInstructionBase {
     }
 }
 
+extension SolanaInstructionAssetOwner: SolanaInstructionBase {
+    public func getSigners() -> [SolanaSigner] {
+        return [
+            SolanaSigner(publicKey: destination, isSigner: false, isWritable: false)
+        ]
+    }
+    
+    public func getPromgramId() -> SolanaPublicKey {
+        return SolanaPublicKey.OWNERVALIDATIONPROGRAMID
+    }
+}
+
+extension SolanaInstructionAssetOwner: BorshCodable {
+    public func serialize(to writer: inout Data) throws {
+        writer.append(SolanaPublicKey.OWNERPROGRAMID.data)
+    }
+    
+    public init(from reader: inout BinaryReader) throws {
+        destination = SolanaPublicKey.MEMOPROGRAMID
+    }
+}
+
 extension SolanaInstructionAssetOwner: SolanaHumanReadable {
-    public func toHuman() -> Dictionary<String, Any> {
+    public func toHuman() -> Any {
         return [
             "type": "Asset Owner",
             "data": [
-                "destination":self.signers.first?.publicKey.address,
-                "data":self.data.toHexString()
-                    ]
+                "destination":self.getSigners().first!.publicKey.address
+            ]
         ]
     }
 }
