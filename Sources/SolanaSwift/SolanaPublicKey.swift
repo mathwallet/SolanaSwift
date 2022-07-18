@@ -13,13 +13,14 @@ import CTweetNacl
 public struct SolanaPublicKey {
     public static let Size: Int = 32
     
-    public static let OWNERPROGRAMID = SolanaPublicKey(base58String: "11111111111111111111111111111111")!
-    public static let TOKENPROGRAMID = SolanaPublicKey(base58String: "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA")!
-    public static let MEMOPROGRAMID = SolanaPublicKey(base58String: "Memo1UhkJRfHyvLMcVucJwxXeuD728EqVDDwQDxFMNo")!
-    public static let ASSOCIATEDTOKENPROGRAMID = SolanaPublicKey(base58String: "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL")!
-    public static let SYSVARRENTPUBKEY = SolanaPublicKey(base58String: "SysvarRent111111111111111111111111111111111")!
-    public static let OWNERVALIDATIONPROGRAMID = SolanaPublicKey(base58String: "4MNPdKu9wFMvEeZBMt3Eipfs5ovVWTJb31pEXDJAAxX5")!
-    public static let MATEDATAPUBLICKEY = SolanaPublicKey(base58String: "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s")!
+    public static let SYSTEM_PROGRAM_ID = SolanaPublicKey(base58String: "11111111111111111111111111111111")!
+    public static let TOKEN_PROGRAM_ID = SolanaPublicKey(base58String: "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA")!
+    public static let MEMO_PROGRAM_ID = SolanaPublicKey(base58String: "Memo1UhkJRfHyvLMcVucJwxXeuD728EqVDDwQDxFMNo")!
+    public static let ASSOCIATED_TOKEN_PROGRAM_ID = SolanaPublicKey(base58String: "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL")!
+    public static let SYSVAR_RENT_PUBKEY = SolanaPublicKey(base58String: "SysvarRent111111111111111111111111111111111")!
+    public static let OWNER_VALIDATION_PROGRAM_ID = SolanaPublicKey(base58String: "4MNPdKu9wFMvEeZBMt3Eipfs5ovVWTJb31pEXDJAAxX5")!
+    public static let MATEDATA_PUBLICKEY = SolanaPublicKey(base58String: "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s")!
+    
     public let data: Data
     public var address:String {
         return Base58.base58Encode(self.data.bytes)
@@ -80,11 +81,11 @@ extension SolanaPublicKey {
             do {
                 var data = Data()
                 try pubkey.serialize(to: &data)
-                try SolanaPublicKey.TOKENPROGRAMID.serialize(to: &data)
+                try SolanaPublicKey.TOKEN_PROGRAM_ID.serialize(to: &data)
                 try mint.serialize(to: &data)
                 try UInt8(i).serialize(to: &data)
-                try SolanaPublicKey.ASSOCIATEDTOKENPROGRAMID.serialize(to: &data)
-                try "ProgramDerivedAddress".serialize(to: &data)
+                try SolanaPublicKey.ASSOCIATED_TOKEN_PROGRAM_ID.serialize(to: &data)
+                data.append("ProgramDerivedAddress".data(using: .utf8)!)
                 
                 let hashdata = data.sha256()
                 if (is_on_curve(hashdata.bytes) == 0) {
@@ -102,12 +103,12 @@ extension SolanaPublicKey {
         while i > 0 {
             do {
                 var data = Data()
-                try "metadata".serialize(to: &data)
-                try SolanaPublicKey.MATEDATAPUBLICKEY.serialize(to: &data)
+                data.append("metadata".data(using: .utf8)!)
+                try SolanaPublicKey.MATEDATA_PUBLICKEY.serialize(to: &data)
                 try mint.serialize(to: &data)
                 try UInt8(i).serialize(to: &data)
-                try SolanaPublicKey.MATEDATAPUBLICKEY.serialize(to: &data)
-                try "ProgramDerivedAddress".serialize(to: &data)
+                try SolanaPublicKey.MATEDATA_PUBLICKEY.serialize(to: &data)
+                data.append("ProgramDerivedAddress".data(using: .utf8)!)
                 
                 let hashdata = data.sha256()
                 if (is_on_curve(hashdata.bytes) == 0) {
@@ -128,7 +129,7 @@ extension SolanaPublicKey {
                 data.append(seeds)
                 try UInt8(i).serialize(to: &data)
                 try programId.serialize(to: &data)
-                try "ProgramDerivedAddress".serialize(to: &data)
+                data.append("ProgramDerivedAddress".data(using: .utf8)!)
                 
                 let hashdata = data.sha256()
                 if (is_on_curve(hashdata.bytes) == 0) {

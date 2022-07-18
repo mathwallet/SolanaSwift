@@ -8,18 +8,18 @@
 import Foundation
 
 public struct SolanaInstructionAssociatedAccount: SolanaInstructionBase {
-    public var promgramId: SolanaPublicKey = SolanaPublicKey.ASSOCIATEDTOKENPROGRAMID
+    public var promgramId: SolanaPublicKey = SolanaPublicKey.ASSOCIATED_TOKEN_PROGRAM_ID
     public var signers: [SolanaSigner]
     
-    public init(from: SolanaPublicKey, to: SolanaPublicKey, associatedToken: SolanaPublicKey, mint: SolanaPublicKey) {
+    public init(funding: SolanaPublicKey, wallet: SolanaPublicKey, associatedToken: SolanaPublicKey, mint: SolanaPublicKey) {
         self.signers = [
-            SolanaSigner(publicKey: from, isSigner: true, isWritable: true),
+            SolanaSigner(publicKey: funding, isSigner: true, isWritable: true),
             SolanaSigner(publicKey: associatedToken, isSigner: false, isWritable: true),
-            SolanaSigner(publicKey: to),
+            SolanaSigner(publicKey: wallet),
             SolanaSigner(publicKey: mint),
-            SolanaSigner(publicKey: SolanaPublicKey.OWNERPROGRAMID),
-            SolanaSigner(publicKey: SolanaPublicKey.TOKENPROGRAMID),
-            SolanaSigner(publicKey: SolanaPublicKey.SYSVARRENTPUBKEY)
+            SolanaSigner(publicKey: SolanaPublicKey.SYSTEM_PROGRAM_ID),
+            SolanaSigner(publicKey: SolanaPublicKey.TOKEN_PROGRAM_ID),
+            SolanaSigner(publicKey: SolanaPublicKey.SYSVAR_RENT_PUBKEY)
         ]
     }
 }
@@ -38,7 +38,9 @@ extension SolanaInstructionAssociatedAccount: SolanaHumanReadable {
         return [
             "type": "Associated Account",
             "promgramId": promgramId.address,
-            "data": signers.map({$0.publicKey.address})
+            "data": [
+                "keys": signers.map({$0.publicKey.address})
+            ]
         ]
     }
 }

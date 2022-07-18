@@ -8,10 +8,12 @@
 import Foundation
 
 public struct SolanaInstructionAssetOwner: SolanaInstructionBase {
-    public var promgramId: SolanaPublicKey = SolanaPublicKey.OWNERVALIDATIONPROGRAMID
+    public var promgramId: SolanaPublicKey = SolanaPublicKey.OWNER_VALIDATION_PROGRAM_ID
     public var signers: [SolanaSigner]
+    public let owner: SolanaPublicKey
     
-    public init(destination: SolanaPublicKey) {
+    public init(destination: SolanaPublicKey, owner: SolanaPublicKey = .SYSTEM_PROGRAM_ID ) {
+        self.owner = owner
         self.signers = [
             SolanaSigner(publicKey: destination, isSigner: false, isWritable: false)
         ]
@@ -20,14 +22,11 @@ public struct SolanaInstructionAssetOwner: SolanaInstructionBase {
 
 extension SolanaInstructionAssetOwner: BorshCodable {
     public func serialize(to writer: inout Data) throws {
-        writer.append(SolanaPublicKey.OWNERPROGRAMID.data)
+        try owner.serialize(to: &writer)
     }
     
     public init(from reader: inout BinaryReader) throws {
-        guard try SolanaPublicKey.init(from: &reader) == SolanaPublicKey.OWNERPROGRAMID else {
-            reader.cursor -= SolanaPublicKey.Size
-            throw BorshDecodingError.unknownData
-        }
+        owner = try SolanaPublicKey.init(from: &reader)
         signers = []
     }
 }

@@ -9,7 +9,7 @@ import Foundation
 import BigInt
 
 public struct SolanaInstructionTransfer: SolanaInstructionBase {
-    public var promgramId: SolanaPublicKey = SolanaPublicKey.OWNERPROGRAMID
+    public var promgramId: SolanaPublicKey = SolanaPublicKey.SYSTEM_PROGRAM_ID
     public var signers: [SolanaSigner]
     private let lamports: BigUInt
     
@@ -32,7 +32,6 @@ extension SolanaInstructionTransfer: BorshCodable {
     public init(from reader: inout BinaryReader) throws {
         // Instruction Type
         guard try UInt32.init(from: &reader)  == 2 else {
-            reader.cursor -= MemoryLayout<UInt32>.size
             throw BorshDecodingError.unknownData
         }
         signers = []

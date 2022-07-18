@@ -26,7 +26,7 @@ extension SolanaInstructionRaw: BorshCodable {
     }
     
     public init(from reader: inout BinaryReader) throws {
-        promgramId = SolanaPublicKey.MEMOPROGRAMID
+        promgramId = SolanaPublicKey.SYSTEM_PROGRAM_ID
         signers = []
         data = Data()
     }

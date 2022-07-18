@@ -192,7 +192,7 @@ extension SolanaRPCProvider {
     
     public func getNfts(owner:String,successBlock:@escaping (_ nftTokens:[SolanaNFTTokenResult],_ nfts:[SolanaNFTResult])-> Void,failure:@escaping (_ error:Error)-> Void) {
         var nfts:[SolanaNFTResult] = [SolanaNFTResult]()
-        self.getNFTTokensByOwner(owner: owner, programId: SolanaPublicKey.TOKENPROGRAMID.address, successBlock: { nftTokens in
+        self.getNFTTokensByOwner(owner: owner, programId: SolanaPublicKey.TOKEN_PROGRAM_ID.address, successBlock: { nftTokens in
             let queue = DispatchQueue(label: "solana", attributes: .concurrent)
             let group = DispatchGroup()
             nftTokens.forEach { nftToken in

@@ -67,6 +67,7 @@ extension Optional where Wrapped: BorshSerializable {
 extension String: BorshSerializable {
     public func serialize(to writer: inout Data) throws {
         let data = Data(utf8)
+        try UInt32(data.count).serialize(to: &writer)
         writer.append(data)
     }
 }
