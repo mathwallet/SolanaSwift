@@ -9,7 +9,7 @@ import Foundation
 import BigInt
 
 public struct SolanaInstructionToken: SolanaInstructionBase {
-    public let promgramId: SolanaPublicKey = SolanaPublicKey.TOKEN_PROGRAM_ID
+    public let programId: SolanaPublicKey = SolanaPublicKey.TOKEN_PROGRAM_ID
     public var signers: [SolanaSigner]
     
     public let lamports: BigUInt
@@ -46,7 +46,7 @@ extension SolanaInstructionToken: SolanaHumanReadable {
     public func toHuman() -> Any {
         return [
             "type": "Transfer Token",
-            "promgramId": promgramId.address,
+            "programId": programId.address,
             "data": [
                 "keys": signers.map({$0.publicKey.address}),
                 "lamports": lamports.description

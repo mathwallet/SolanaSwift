@@ -8,7 +8,7 @@
 import Foundation
 
 public struct SolanaInstructionAssetOwner: SolanaInstructionBase {
-    public var promgramId: SolanaPublicKey = SolanaPublicKey.OWNER_VALIDATION_PROGRAM_ID
+    public var programId: SolanaPublicKey = SolanaPublicKey.OWNER_VALIDATION_PROGRAM_ID
     public var signers: [SolanaSigner]
     public let owner: SolanaPublicKey
     
@@ -35,7 +35,7 @@ extension SolanaInstructionAssetOwner: SolanaHumanReadable {
     public func toHuman() -> Any {
         return [
             "type": "Asset Owner",
-            "promgramId": promgramId.address,
+            "programId": programId.address,
             "data": [
                 "keys": signers.map({$0.publicKey.address})
             ]

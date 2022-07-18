@@ -9,12 +9,12 @@ import Foundation
 
 public struct SolanaInstructionRaw: SolanaInstructionBase {
     
-    public var promgramId: SolanaPublicKey
+    public var programId: SolanaPublicKey
     public var signers: [SolanaSigner]
     public var data: Data
     
-    public init(promgramId: SolanaPublicKey, signers: [SolanaSigner], data: Data) {
-        self.promgramId = promgramId
+    public init(programId: SolanaPublicKey, signers: [SolanaSigner], data: Data) {
+        self.programId = programId
         self.signers = signers
         self.data = data
     }
@@ -26,7 +26,7 @@ extension SolanaInstructionRaw: BorshCodable {
     }
     
     public init(from reader: inout BinaryReader) throws {
-        promgramId = SolanaPublicKey.SYSTEM_PROGRAM_ID
+        programId = SolanaPublicKey.SYSTEM_PROGRAM_ID
         signers = []
         data = Data()
     }
@@ -36,7 +36,7 @@ extension SolanaInstructionRaw: SolanaHumanReadable {
     public func toHuman() -> Any {
         return [
             "type": "Unknown Type",
-            "promgramId": promgramId.address,
+            "programId": programId.address,
             "data": [
                 "keys": signers.map({$0.publicKey.address})
             ]

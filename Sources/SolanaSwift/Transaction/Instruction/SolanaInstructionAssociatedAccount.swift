@@ -8,7 +8,7 @@
 import Foundation
 
 public struct SolanaInstructionAssociatedAccount: SolanaInstructionBase {
-    public var promgramId: SolanaPublicKey = SolanaPublicKey.ASSOCIATED_TOKEN_PROGRAM_ID
+    public var programId: SolanaPublicKey = SolanaPublicKey.ASSOCIATED_TOKEN_PROGRAM_ID
     public var signers: [SolanaSigner]
     
     public init(funding: SolanaPublicKey, wallet: SolanaPublicKey, associatedToken: SolanaPublicKey, mint: SolanaPublicKey) {
@@ -37,7 +37,7 @@ extension SolanaInstructionAssociatedAccount: SolanaHumanReadable {
     public func toHuman() -> Any {
         return [
             "type": "Associated Account",
-            "promgramId": promgramId.address,
+            "programId": programId.address,
             "data": [
                 "keys": signers.map({$0.publicKey.address})
             ]

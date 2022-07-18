@@ -16,7 +16,7 @@ public struct SolanaTransaction {
     public var sortedSigners: [SolanaSigner] {
         var tempSigners = [SolanaSigner]()
         tempSigners.append(contentsOf: self.instructions.flatMap({ $0.signers }))
-        tempSigners.append(contentsOf: self.instructions.map({ SolanaSigner(publicKey: $0.promgramId) }))
+        tempSigners.append(contentsOf: self.instructions.map({ SolanaSigner(publicKey: $0.programId) }))
         
         // 排序
         let soredArray = tempSigners.sorted(by: >)
@@ -78,7 +78,7 @@ extension SolanaTransaction: BorshCodable {
         
         try UVarInt(instructions.count).serialize(to: &writer)
         for instruction in instructions {
-            try UInt8(publicKeys.firstIndex(of: instruction.promgramId)!).serialize(to: &writer)
+            try UInt8(publicKeys.firstIndex(of: instruction.programId)!).serialize(to: &writer)
             
             try UVarInt(instruction.signers.count).serialize(to: &writer)
             for signer in instruction.signers {
@@ -104,9 +104,9 @@ extension SolanaTransaction: BorshCodable {
         var instructions = [SolanaInstruction]()
         let instructionCount = try UVarInt.init(from: &reader).value
         for _ in 0..<instructionCount {
-            let promgramIdIndex: UInt8 = try .init(from: &reader)
-            let promgramId = publicKeys[Int(promgramIdIndex)]
-            debugPrint(promgramId)
+            let programIdIndex: UInt8 = try .init(from: &reader)
+            let programId = publicKeys[Int(programIdIndex)]
+            debugPrint(programId)
             
             let keyCount = try UVarInt.init(from: &reader).value
             var signers = [SolanaSigner]()
@@ -117,7 +117,7 @@ extension SolanaTransaction: BorshCodable {
             let dataCount = try UVarInt.init(from: &reader).value
             let data = Data(reader.read(count: dataCount))
             
-            let decodeInstruction = SolanaInstructionDecoder.decode(promgramId: promgramId, data: data, signers: signers)
+            let decodeInstruction = SolanaInstructionDecoder.decode(programId: programId, data: data, signers: signers)
             instructions.append(decodeInstruction)
         }
         self.instructions = instructions
