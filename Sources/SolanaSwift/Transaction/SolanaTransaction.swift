@@ -38,10 +38,6 @@ public struct SolanaTransaction {
         self.instructions.append(instruction)
     }
     
-    public func serializeAndBase58() throws -> String {
-        return Base58.base58Encode(try BorshEncoder().encode(self).bytes)
-    }
-    
     public func sign(keypair: SolanaKeyPair) throws -> SolanaSignedTransaction {
         try self.sign(keypair: keypair, otherPairs: [])
     }
@@ -106,7 +102,6 @@ extension SolanaTransaction: BorshCodable {
         for _ in 0..<instructionCount {
             let programIdIndex: UInt8 = try .init(from: &reader)
             let programId = publicKeys[Int(programIdIndex)]
-            debugPrint(programId)
             
             let keyCount = try UVarInt.init(from: &reader).value
             var signers = [SolanaSigner]()
