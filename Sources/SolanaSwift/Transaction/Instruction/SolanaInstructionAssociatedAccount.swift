@@ -8,58 +8,39 @@
 import Foundation
 
 public struct SolanaInstructionAssociatedAccount: SolanaInstructionBase {
+    public var programId: SolanaPublicKey = SolanaPublicKey.ASSOCIATED_TOKEN_PROGRAM_ID
+    public var signers: [SolanaSigner]
     
-    public var promgramId: SolanaPublicKey = SolanaPublicKey.ASSOCIATEDTOKENPROGRAMID
-    
-    public var signers = [SolanaSigner]()
-    
-    public var data = Data()
-    
-    public init?(promgramId: SolanaPublicKey, signers: [SolanaSigner], data: Data) {
-        self.promgramId = promgramId
-        self.signers = signers
-        self.data = data
+    public init(funding: SolanaPublicKey, wallet: SolanaPublicKey, associatedToken: SolanaPublicKey, mint: SolanaPublicKey) {
+        self.signers = [
+            SolanaSigner(publicKey: funding, isSigner: true, isWritable: true),
+            SolanaSigner(publicKey: associatedToken, isSigner: false, isWritable: true),
+            SolanaSigner(publicKey: wallet),
+            SolanaSigner(publicKey: mint),
+            SolanaSigner(publicKey: SolanaPublicKey.SYSTEM_PROGRAM_ID),
+            SolanaSigner(publicKey: SolanaPublicKey.TOKEN_PROGRAM_ID),
+            SolanaSigner(publicKey: SolanaPublicKey.SYSVAR_RENT_PUBKEY)
+        ]
     }
-    
-    public init(from: SolanaPublicKey, to: SolanaPublicKey, associatedToken: SolanaPublicKey, mint: SolanaPublicKey) {
-        
-        self.signers.append(SolanaSigner(publicKey: from, isSigner: true, isWritable: true))
-        self.signers.append(SolanaSigner(publicKey: associatedToken, isSigner: false, isWritable: true))
-        self.signers.append(SolanaSigner(publicKey: to))
-        self.signers.append(SolanaSigner(publicKey: mint))
-        self.signers.append(SolanaSigner(publicKey: SolanaPublicKey.OWNERPROGRAMID))
-        self.signers.append(SolanaSigner(publicKey: SolanaPublicKey.TOKENPROGRAMID))
-        self.signers.append(SolanaSigner(publicKey: SolanaPublicKey.SYSVARRENTPUBKEY))
+}
 
-        self.data = toData()
+extension SolanaInstructionAssociatedAccount: BorshCodable {
+    public func serialize(to writer: inout Data) throws {
     }
     
-    private func toData() -> Data {
-        return Data()
+    public init(from reader: inout BinaryReader) throws {
+        signers = []
     }
-    
 }
 
 extension SolanaInstructionAssociatedAccount: SolanaHumanReadable {
-    public func toHuman() -> Dictionary<String, Any> {
-        var dataDic:[String:String] = [String:String]()
-        for i in 0..<self.signers.count {
-            let signer = self.signers[i]
-            if signer.isWritable {
-                if signer.isSigner {
-                    dataDic["from"] = signer.publicKey.address
-                    continue
-                } else {
-                    dataDic["associatedToken"] = signer.publicKey.address
-                    continue
-                }
-            } else {
-                dataDic["key\(i)"] = signer.publicKey.address
-            }
-        }
+    public func toHuman() -> Any {
         return [
             "type": "Associated Account",
-            "data": dataDic
+            "programId": programId.address,
+            "data": [
+                "keys": signers.map({$0.publicKey.address})
+            ]
         ]
     }
 }

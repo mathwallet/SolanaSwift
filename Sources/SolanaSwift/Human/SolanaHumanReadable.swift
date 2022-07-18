@@ -8,5 +8,5 @@
 import Foundation
 
 public protocol SolanaHumanReadable {
-    func toHuman() -> Dictionary<String, Any>
+    func toHuman() -> Any
 }

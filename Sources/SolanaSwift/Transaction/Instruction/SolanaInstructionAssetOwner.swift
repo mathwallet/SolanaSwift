@@ -8,37 +8,37 @@
 import Foundation
 
 public struct SolanaInstructionAssetOwner: SolanaInstructionBase {
+    public var programId: SolanaPublicKey = SolanaPublicKey.OWNER_VALIDATION_PROGRAM_ID
+    public var signers: [SolanaSigner]
+    public let owner: SolanaPublicKey
     
-    public var promgramId: SolanaPublicKey = SolanaPublicKey.OWNERVALIDATIONPROGRAMID
-    
-    public var signers = [SolanaSigner]()
-    
-    public var data = Data()
-    
-    public init?(promgramId: SolanaPublicKey, signers: [SolanaSigner], data: Data) {
-        self.promgramId = promgramId
-        self.signers = signers
-        self.data = data
+    public init(destination: SolanaPublicKey, owner: SolanaPublicKey = .SYSTEM_PROGRAM_ID ) {
+        self.owner = owner
+        self.signers = [
+            SolanaSigner(publicKey: destination, isSigner: false, isWritable: false)
+        ]
+    }
+}
+
+extension SolanaInstructionAssetOwner: BorshCodable {
+    public func serialize(to writer: inout Data) throws {
+        try owner.serialize(to: &writer)
     }
     
-    public init(destination: SolanaPublicKey) {
-        self.signers.append(SolanaSigner(publicKey: destination, isSigner: false, isWritable: false))
-        self.data = toData()
-    }
-    
-    private func toData() -> Data {
-        return Data(SolanaPublicKey.OWNERPROGRAMID.data)
+    public init(from reader: inout BinaryReader) throws {
+        owner = try SolanaPublicKey.init(from: &reader)
+        signers = []
     }
 }
 
 extension SolanaInstructionAssetOwner: SolanaHumanReadable {
-    public func toHuman() -> Dictionary<String, Any> {
+    public func toHuman() -> Any {
         return [
             "type": "Asset Owner",
+            "programId": programId.address,
             "data": [
-                "destination":self.signers.first?.publicKey.address,
-                "data":self.data.toHexString()
-                    ]
+                "keys": signers.map({$0.publicKey.address})
+            ]
         ]
     }
 }

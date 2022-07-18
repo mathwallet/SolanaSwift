@@ -7,7 +7,6 @@
 
 import Foundation
 import Alamofire
-import MetaPlexBorsh
 
 public struct SolanaRPCProvider {
     public struct SolanaRpcResult<T: Codable>: Codable {
@@ -144,7 +143,7 @@ extension SolanaRPCProvider {
                 let amount = Int(value.account!.data!.parsed!.info!.tokenAmount!.amount!)!
                 let decimals = value.account!.data!.parsed!.info!.tokenAmount!.decimals!
                 if amount > 0 && decimals == 0 {
-                    guard let mint = SolanaPublicKey(base58String:value.account!.data!.parsed!.info!.mint!),let FDAAdddress = SolanaPublicKey.createProgramAddress( mint:mint) else {
+                    guard let mint = SolanaPublicKey(base58String:value.account!.data!.parsed!.info!.mint!),let FDAAdddress = SolanaPublicKey.createProgramAddress(mint:mint) else {
                         failure(SolanaRpcProviderError.unknown)
                         return
                     }
@@ -193,7 +192,7 @@ extension SolanaRPCProvider {
     
     public func getNfts(owner:String,successBlock:@escaping (_ nftTokens:[SolanaNFTTokenResult],_ nfts:[SolanaNFTResult])-> Void,failure:@escaping (_ error:Error)-> Void) {
         var nfts:[SolanaNFTResult] = [SolanaNFTResult]()
-        self.getNFTTokensByOwner(owner: owner, programId: SolanaPublicKey.TOKENPROGRAMID.address, successBlock: { nftTokens in
+        self.getNFTTokensByOwner(owner: owner, programId: SolanaPublicKey.TOKEN_PROGRAM_ID.address, successBlock: { nftTokens in
             let queue = DispatchQueue(label: "solana", attributes: .concurrent)
             let group = DispatchGroup()
             nftTokens.forEach { nftToken in

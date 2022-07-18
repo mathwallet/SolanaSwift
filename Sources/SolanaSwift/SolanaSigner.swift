@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct SolanaSigner {
+public struct SolanaSigner: CustomStringConvertible {
     
     public var publicKey: SolanaPublicKey
     public var isSigner: Bool = false
@@ -17,6 +17,14 @@ public struct SolanaSigner {
         self.publicKey = publicKey
         self.isSigner = isSigner
         self.isWritable = isWritable
+    }
+    
+    public var description: String {
+        return """
+            PublicKey : \(publicKey.address)
+            isSigner : \(isSigner)
+            isWritable : \(isWritable)
+        """
     }
 }
 
