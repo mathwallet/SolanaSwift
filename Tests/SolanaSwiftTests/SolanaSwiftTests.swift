@@ -142,7 +142,7 @@ final class SolanaSwiftTests: XCTestCase {
     }
     
     func testVerify() throws {
-        let data = Base58.base58Decode("5EUTDDM4RxaskE8QTtnkMEr8KvhK2k1Hif9mLeQnusAaVuVoQz4pVoHgjRfueKU5nfn1ce9a9mjT4iMw2tjtgcMa")!
+        let data = "5EUTDDM4RxaskE8QTtnkMEr8KvhK2k1Hif9mLeQnusAaVuVoQz4pVoHgjRfueKU5nfn1ce9a9mjT4iMw2tjtgcMa".base58DecodedData
         let keypair = try SolanaKeyPair(secretKey: Data(data))
         let message = "MathWallet".data(using:.utf8)!
         let signature = try keypair.signDigest(messageDigest: message)

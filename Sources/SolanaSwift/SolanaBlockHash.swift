@@ -18,7 +18,8 @@ public struct SolanaBlockHash {
     }
     
     public init?(base58String: String) {
-        guard let data = Base58.base58Decode(base58String) else {
+        let data = base58String.base58DecodedData
+        guard data.count == 32 else {
             return nil
         }
         self.init(data: Data(data))
@@ -27,7 +28,7 @@ public struct SolanaBlockHash {
 
 extension SolanaBlockHash: CustomStringConvertible {
     public var description: String {
-        return Base58.base58Encode(data.bytes)
+        return data.bytes.base58EncodedString
     }
 }
 

@@ -23,7 +23,7 @@ public struct SolanaPublicKey {
     
     public let data: Data
     public var address:String {
-        return Base58.base58Encode(self.data.bytes)
+        return self.data.bytes.base58EncodedString
     }
     
     public init(data: Data) {
@@ -31,7 +31,8 @@ public struct SolanaPublicKey {
     }
     
     public init?(base58String: String) {
-        guard let data = Base58.base58Decode(base58String) else {
+        let data = base58String.base58DecodedData
+        guard data.count == Self.Size else {
             return nil
         }
         self.init(data: Data(data))
@@ -40,7 +41,8 @@ public struct SolanaPublicKey {
 
 extension SolanaPublicKey {
     public static func isValidAddress(_ address: String) -> Bool{
-        guard let data = Base58.base58Decode(address)  else {
+        let data = address.base58DecodedData
+        guard data.count == Self.Size  else {
             return false
         }
         guard data.count == SolanaPublicKey.Size else {

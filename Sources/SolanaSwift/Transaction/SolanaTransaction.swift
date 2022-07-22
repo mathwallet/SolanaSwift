@@ -147,7 +147,7 @@ extension SolanaSignedTransaction: BorshCodable {
     }
     
     public func serializeAndBase58() throws -> String {
-        return Base58.base58Encode(try BorshEncoder().encode(self).bytes)
+        return try BorshEncoder().encode(self).bytes.base58EncodedString
     }
 }
 

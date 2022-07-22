@@ -16,14 +16,15 @@ public struct SolanaSignature {
     }
     
     public init?(base58String: String) {
-        guard let decodeData = Base58.base58Decode(base58String) else {
+        let decodeData = base58String.base58DecodedData
+        guard decodeData.count == 64 else {
             return nil
         }
         self.data = Data(decodeData)
     }
     
     public func base58Sting() -> String {
-        return Base58.base58Encode(self.data.bytes)
+        return self.data.bytes.base58EncodedString
     }
 }
 
