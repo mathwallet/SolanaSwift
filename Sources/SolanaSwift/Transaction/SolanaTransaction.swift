@@ -133,6 +133,10 @@ extension SolanaTransaction: SolanaHumanReadable {
 public struct SolanaSignedTransaction {
     let transaction: SolanaTransaction
     let signatures: [SolanaSignature]
+    
+    public var signatureDatas: [Data] {
+        return signatures.map({$0.data})
+    }
 }
 
 extension SolanaSignedTransaction: BorshCodable {
