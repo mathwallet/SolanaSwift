@@ -141,6 +141,11 @@ public struct SolanaSignedTransaction {
     let transaction: SolanaTransaction
     let signatures: [SolanaSignature]
     
+    public init(transaction: SolanaTransaction, signatures: [SolanaSignature]) {
+        self.transaction = transaction
+        self.signatures = signatures
+    }
+    
     public var signatureDatas: [Data] {
         return signatures.map({$0.data})
     }
