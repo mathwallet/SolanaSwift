@@ -12,7 +12,7 @@ import CryptoSwift
 public struct SolanaTransaction {
     public var instructions = [SolanaInstruction]()
     public var recentBlockhash: SolanaBlockHash = .EMPTY
-    public var payer: SolanaPublicKey?
+    public var feePayer: SolanaPublicKey?
     
     public var sortedSigners: [SolanaSigner] {
         var tempSigners = [SolanaSigner]()
@@ -32,7 +32,13 @@ public struct SolanaTransaction {
         }
         
         // 排序
-        let soredArray = uniqueSigners.sorted(by: <)
+        var soredArray = uniqueSigners.sorted(by: <)
+        
+        // Move fee payer to the front
+        if let payer = feePayer, let i = soredArray.map({ $0.publicKey }).firstIndex(of: payer), i > 0 {
+            soredArray.remove(at: i)
+            soredArray.append(SolanaSigner(publicKey: payer, isSigner: true, isWritable: true))
+        }
       
         return soredArray
     }
@@ -44,11 +50,12 @@ public struct SolanaTransaction {
         self.instructions.append(instruction)
     }
     
-    public func sign(keypair: SolanaKeyPair) throws -> SolanaSignedTransaction {
+    public mutating func sign(keypair: SolanaKeyPair) throws -> SolanaSignedTransaction {
         try self.sign(keypair: keypair, otherPairs: [])
     }
     
-    public func sign(keypair: SolanaKeyPair, otherPairs: [SolanaKeyPair]) throws -> SolanaSignedTransaction {
+    public mutating func sign(keypair: SolanaKeyPair, otherPairs: [SolanaKeyPair]) throws -> SolanaSignedTransaction {
+        self.feePayer = keypair.publicKey
         let digest = try BorshEncoder().encode(self)
         
         let keypairs = [keypair] + otherPairs
