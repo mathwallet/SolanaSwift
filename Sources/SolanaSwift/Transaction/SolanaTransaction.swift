@@ -12,23 +12,29 @@ import CryptoSwift
 public struct SolanaTransaction {
     public var instructions = [SolanaInstruction]()
     public var recentBlockhash: SolanaBlockHash = .EMPTY
+    public var payer: SolanaPublicKey?
     
     public var sortedSigners: [SolanaSigner] {
         var tempSigners = [SolanaSigner]()
         tempSigners.append(contentsOf: self.instructions.flatMap({ $0.signers }))
         tempSigners.append(contentsOf: self.instructions.map({ SolanaSigner(publicKey: $0.programId) }))
         
-        // 排序
-        let soredArray = tempSigners.sorted(by: >)
         
         // 去重
-        var signers = [SolanaSigner]()
-        for signer in soredArray {
-            if !signers.contains(signer) {
-                signers.append(signer)
+        var uniqueSigners = [SolanaSigner]()
+        for s in tempSigners {
+            if let i = uniqueSigners.firstIndex(of: s){
+                uniqueSigners[i].isSigner = uniqueSigners[i].isSigner || s.isSigner
+                uniqueSigners[i].isWritable = uniqueSigners[i].isWritable || s.isWritable
+            } else {
+                uniqueSigners.append(s)
             }
         }
-        return signers
+        
+        // 排序
+        let soredArray = uniqueSigners.sorted(by: <)
+      
+        return soredArray
     }
     
     public init() {
@@ -107,7 +113,8 @@ extension SolanaTransaction: BorshCodable {
             var signers = [SolanaSigner]()
             for _ in 0..<keyCount {
                 let i: UInt8 = try .init(from: &reader)
-                signers.append(SolanaSigner(publicKey: publicKeys[Int(i)], isSigner: i < signCount, isWritable: i < publicKeys.count - Int(readonlyCount + signAndReadCount) ))
+                let isWritable = ( (i >= 0 && i < Int(signCount) - Int(signAndReadCount)) || (i >= signCount && i < publicKeys.count - Int(readonlyCount)))
+                signers.append(SolanaSigner(publicKey: publicKeys[Int(i)], isSigner: i < signCount, isWritable: isWritable ))
             }
             let dataCount = try UVarInt.init(from: &reader).value
             let data = Data(reader.read(count: dataCount))

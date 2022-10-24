@@ -36,12 +36,14 @@ extension SolanaSigner: Equatable {
 
 extension SolanaSigner: Comparable {
     public static func < (lhs: SolanaSigner, rhs: SolanaSigner) -> Bool {
-        if rhs.isSigner && !lhs.isSigner {
-            return true
+        if lhs.isSigner != rhs.isSigner {
+            return lhs.isSigner
         }
-        if (lhs.isSigner == rhs.isSigner) && rhs.isWritable && !lhs.isWritable {
-            return true
+        
+        if lhs.isWritable != rhs.isWritable {
+            return lhs.isWritable
         }
-        return false
+        
+        return lhs.publicKey.address.localizedStandardCompare(rhs.publicKey.address) != .orderedDescending
     }
 }
