@@ -44,6 +44,6 @@ extension SolanaSigner: Comparable {
             return lhs.isWritable
         }
         
-        return lhs.publicKey.address.localizedStandardCompare(rhs.publicKey.address) != .orderedDescending
+        return lhs.publicKey.address.localizedCompare(rhs.publicKey.address) != .orderedDescending
     }
 }

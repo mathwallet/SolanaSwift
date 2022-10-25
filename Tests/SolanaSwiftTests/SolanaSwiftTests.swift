@@ -49,12 +49,19 @@ final class SolanaSwiftTests: XCTestCase {
         debugPrint(decodedSignedTransaction.toHuman())
     }
     
+    func testRecoverTransactio222nExamples() throws {
+        debugPrint("9U3PefXaFHYiTaCz2p4SsW6X5RK9Kq7FxUeB3PTwpG1a".localizedCompare("9qt6WGCcamzTcAma4mxBgyPyraaWCXuKfdimb3xJ2zC2") == .orderedDescending)
+        debugPrint("9U3PefXaFHYiTaCz2p4SsW6X5RK9Kq7FxUeB3PTwpG1a".localizedCompare("9qt6WGCcamzTcAma4mxBgyPyraaWCXuKfdimb3xJ2zC2") == .orderedDescending)
+    }
+    
     func testRecoverTransactionExamples() throws {
-        let encodeDataHex = "02000816e47c4c5496c9385a7b147c0771976f1b1d78be5f35bfd29aca33260d9e731730634b1dbffe68fe9f445f72f49acc1ecf701720d3ce93d9e05050a80a11e8cf3b290bebb87d739e0289137b3ac11fc1d73900f0a29ac5b666605b651d1f3fa8912fbdfb8a1ee2ae7ba28b933665fbe78ee6ade8d499e13a711835611a59a9530a30be5c1c165342a8e829872e15d06ed9d2f301edf7edb74701c17556bcd986cc3493d66ada9112030e98bbc28661b192b766285a21d9f071598e40781615aff545b8acd356d71db052d102c6cdcf4b98c92356a9cd9d8e9060ebe4f9ccf9d4bd50ecda7dce0436fea5b6ec7fe89a75ab6985baa3cec99f460a118aef15256d8b513b4c3991d17c49970f5375cd5799a69ebc8d9d99e683f40476aa3cb627196e8d1e25199fe682f7fc8b5631845efe08c64810adca10de6641ca28dabe4a22159f08328ebbbc694f3a04df30520012efe19b59e555c0068db3fb746207b44802a3a3b3e889585b68ae70e1bc3768d5744d8f6437b55f03952c849292553ef538a4f30af8ac99615556b1525c94f8828536a0415c948e3594be5588925213bad1cc74199b45bacf982d365e46bfef6a11a17a9dc7531e172a67e24ae66f71ad3800000000000000000000000000000000000000000000000000000000000000004157b0580f31c5fce44a62582dbcf9d78ee75943a084a393b350368d228993084bd949c43602c33f207790ed16a3524ca1b9975cf121a2a90cffec7df8b68acd5fb728afdcdc047878ee843a6feb44af28cd53a34828d9903b5ad5e69719552a850f2d6e02a47af824d09ab69dc42d70cb28cbfa249fb7ee57b9d256c12762ef069b8857feab8184fb687f634618c035dac439dc1aeb3b5598a0f0000000000106a7d517192c5c51218cc94c3d4af17f58daee089ba1fd44e3dbd98a0000000006ddf6e1d765a193d9cbe146ceeb79ac1cb485ed5f5b37913a8cf5857eff00a95528deacd3244ed96f25e16e3a0bd37a30ada2dabc18b874763acc202dd29eed040e020001340000000070b4b70000000000a50000000000000006ddf6e1d765a193d9cbe146ceeb79ac1cb485ed5f5b37913a8cf5857eff00a91504011300140101101215090f07060d02120c0b0304080511010a0011098096980000000000b6d408000000000015030100000109"
-        let decodedTransaction = try BorshDecoder.decode(SolanaTransaction.self, from: Data(hex: encodeDataHex))
+        let encodeDataHex = "01000104e47c4c5496c9385a7b147c0771976f1b1d78be5f35bfd29aca33260d9e731730836325bea4d232c32f9dd2273e84669fbf5388bd78c8ea2d0f42159f132cb49be17cc64f90ee8b99e04a30bb193701b6f6c4a11d8c9f64ea1b6334659e8393ac06ddf6e1d765a193d9cbe146ceeb79ac1cb485ed5f5b37913a8cf5857eff00a9ed9f9fc53adddd5c58cb16ec0ea2d7bba0584669835168d7e85f9c045303e3c0020303010000010903030200000109"
+        var decodedTransaction = try BorshDecoder.decode(SolanaTransaction.self, from: Data(hex: encodeDataHex))
+        decodedTransaction.feePayer = SolanaPublicKey(base58String: "GNutLCXQEEcmxkJH5f5rw51bTW2QcLGXqitmN3EaVPoV")
         
         debugPrint(decodedTransaction.sortedSigners.map({ [$0.publicKey.address, $0.isSigner, $0.isWritable] }))
         debugPrint(try BorshEncoder().encode(decodedTransaction).toHexString())
+        XCTAssertEqual(encodeDataHex, try BorshEncoder().encode(decodedTransaction).toHexString())
     }
     
     
