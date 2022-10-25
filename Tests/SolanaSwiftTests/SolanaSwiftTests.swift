@@ -51,7 +51,6 @@ final class SolanaSwiftTests: XCTestCase {
     
     func testRecoverTransactio222nExamples() throws {
         debugPrint("9U3PefXaFHYiTaCz2p4SsW6X5RK9Kq7FxUeB3PTwpG1a".localizedCompare("9qt6WGCcamzTcAma4mxBgyPyraaWCXuKfdimb3xJ2zC2") == .orderedDescending)
-        debugPrint("9U3PefXaFHYiTaCz2p4SsW6X5RK9Kq7FxUeB3PTwpG1a".localizedCompare("9qt6WGCcamzTcAma4mxBgyPyraaWCXuKfdimb3xJ2zC2") == .orderedDescending)
     }
     
     func testRecoverTransactionExamples() throws {
