@@ -37,7 +37,7 @@ public struct SolanaTransaction {
         // Move fee payer to the front
         if let payer = feePayer, let i = soredArray.map({ $0.publicKey }).firstIndex(of: payer), i > 0 {
             soredArray.remove(at: i)
-            soredArray.append(SolanaSigner(publicKey: payer, isSigner: true, isWritable: true))
+            soredArray.insert(SolanaSigner(publicKey: payer, isSigner: true, isWritable: true), at: 0)
         }
       
         return soredArray
@@ -145,8 +145,8 @@ extension SolanaTransaction: SolanaHumanReadable {
 }
 
 public struct SolanaSignedTransaction {
-    let transaction: SolanaTransaction
-    let signatures: [SolanaSignature]
+    public let transaction: SolanaTransaction
+    public let signatures: [SolanaSignature]
     
     public init(transaction: SolanaTransaction, signatures: [SolanaSignature]) {
         self.transaction = transaction
