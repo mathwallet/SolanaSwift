@@ -74,7 +74,7 @@ extension Optional where Wrapped: BorshDeserializable {
 
 extension String: BorshDeserializable {
     public init(from reader: inout BinaryReader) throws {
-        let count: UInt32 = try UVarInt.init(from: &reader).value
+        let count: UInt32 = try .init(from: &reader)
         let bytes = reader.read(count: count)
         guard let value = String(bytes: bytes, encoding: .utf8) else {throw DeserializationError.noData}
         self = value
