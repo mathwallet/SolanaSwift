@@ -171,4 +171,20 @@ final class SolanaSwiftTests: XCTestCase {
         debugPrint(keypair.signVerify(message: message, signature: signature))
     }
     
+    func testMetaData() throws {
+        let token = SolanaNFTTokenResult(pubkey: "55PCiYAh5aGd32wbFWmt25oJhXGYy85uNECKa76zx3aG", mint: "C5yqbnVsWGbH4WRsrWpnnNgPrAvzfLtMrQN73PuBDsaY", owner: "HjBWJD6jNicWBpkmAqy59ivXbxjRC3XHQKR4Q5G7FAn4", FDAAddress: "4yLoB7AwuiWVhaPFt5dxob2S9CXkVrmcSipphsBP3zsi", amount: 1)
+        let provider = SolanaRPCProvider(nodeUrl: "https://solana.maiziqianbao.net")
+        let reqeustExpectation = expectation(description: "Tests")
+        DispatchQueue.global().async {
+            provider.getMetaData(token: token) { metaData in
+                print(metaData.data.uri)
+                reqeustExpectation.fulfill()
+            } failure: { error in
+                print(error.localizedDescription)
+                reqeustExpectation.fulfill()
+            }
+
+        }
+        wait(for: [reqeustExpectation], timeout: 30)
+    }
 }

@@ -4,6 +4,7 @@
 //
 //  Created by xgblin on 2021/11/16.
 //
+// https://github.com/metaplex-foundation/metaplex-ios/blob/main/Sources/Metaplex/Programs/TokenMetadata/Data/MetaplexData.swift
 
 import Foundation
 
@@ -44,8 +45,8 @@ extension MetaPlexData: BorshCodable {
   }
 
   public init(from reader: inout BinaryReader) throws {
-    self.name = try .init(from: &reader).replacingOccurrences(of: "\0", with: "")
-    self.symbol = try .init(from: &reader).replacingOccurrences(of: "\0", with: "")
-    self.uri = try .init(from: &reader).replacingOccurrences(of: "\0", with: "")
+      self.name = try .init(from: &reader).trimmingCharacters(in: CharacterSet(charactersIn: "\0").union(.whitespacesAndNewlines))
+      self.symbol = try .init(from: &reader).trimmingCharacters(in: CharacterSet(charactersIn: "\0").union(.whitespacesAndNewlines))
+      self.uri = try .init(from: &reader).trimmingCharacters(in: CharacterSet(charactersIn: "\0").union(.whitespacesAndNewlines))
   }
 }
