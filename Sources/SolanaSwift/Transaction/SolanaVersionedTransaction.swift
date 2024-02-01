@@ -18,7 +18,11 @@ extension SolanaVersionedTransaction: BorshCodable {
     }
     
     public init(from reader: inout BinaryReader) throws {
-        let _: UInt8 = try .init(from: &reader)
+        let prefix: UInt8 = try .init(from: &reader)
+        let maskedPrefix: UInt8 = (prefix & 0x7f)
+        guard maskedPrefix != prefix, maskedPrefix == 0 else {
+            throw BorshDecodingError.unknownData
+        }
         let signCount: UInt8 = try .init(from: &reader)
         let signAndReadCount: UInt8 = try .init(from: &reader)
         let readonlyCount: UInt8 = try .init(from: &reader)
