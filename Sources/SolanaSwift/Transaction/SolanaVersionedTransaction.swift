@@ -7,7 +7,13 @@
 
 import Foundation
 
+public enum SolanaTransactionVersion: String {
+    case legacy = "legacy"
+    case v0 = "0"
+}
+
 public struct SolanaVersionedTransaction {
+    public var version: SolanaTransactionVersion
     public var instructions = [SolanaInstruction]()
     public var recentBlockhash: SolanaBlockHash = .EMPTY
 }
@@ -18,11 +24,15 @@ extension SolanaVersionedTransaction: BorshCodable {
     }
     
     public init(from reader: inout BinaryReader) throws {
-        let prefix: UInt8 = try .init(from: &reader)
+        guard let prefix: UInt8 = reader.bytes.first else { throw BorshDecodingError.unknownData }
         let maskedPrefix: UInt8 = (prefix & 0x7f)
-        guard maskedPrefix != prefix, maskedPrefix == 0 else {
-            throw BorshDecodingError.unknownData
+        if maskedPrefix != prefix && maskedPrefix == 0 {
+            let _  = try UInt8.init(from: &reader)
+            self.version = .v0
+        } else {
+            self.version = .legacy
         }
+        
         let signCount: UInt8 = try .init(from: &reader)
         let signAndReadCount: UInt8 = try .init(from: &reader)
         let readonlyCount: UInt8 = try .init(from: &reader)
@@ -65,24 +75,11 @@ extension SolanaVersionedTransaction: SolanaHumanReadable {
     
 }
 
-public enum SolanaTransactionVersion: String {
-    case legacy = "legacy"
-    case v0 = "0"
-}
-
 public struct SolanaSignedVersionedTransaction {
-    public let version: SolanaTransactionVersion
-    public let transaction: BorshCodable
+    public let transaction: SolanaVersionedTransaction
     public let signatures: [SolanaSignature]
     
     public init(transaction: SolanaVersionedTransaction, signatures: [SolanaSignature]) {
-        self.version = .v0
-        self.transaction = transaction
-        self.signatures = signatures
-    }
-    
-    public init(transaction: SolanaTransaction, signatures: [SolanaSignature]) {
-        self.version = .legacy
         self.transaction = transaction
         self.signatures = signatures
     }
@@ -100,15 +97,7 @@ extension SolanaSignedVersionedTransaction: BorshCodable {
 
     public init(from reader: inout BinaryReader) throws {
         signatures = try .init(from: &reader)
-        let prefix: UInt8 = reader.bytes[reader.cursor]
-        let maskedPrefix: UInt8 = (prefix & 0x7f)
-        if maskedPrefix != prefix, maskedPrefix == 0 {
-            version = .v0
-            transaction = try SolanaVersionedTransaction.init(from: &reader)
-        } else {
-            version = .legacy
-            transaction = try SolanaTransaction.init(from: &reader)
-        }
+        transaction = try .init(from: &reader)
     }
     
     public func serializeAndBase58() throws -> String {
