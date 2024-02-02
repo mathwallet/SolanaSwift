@@ -59,6 +59,10 @@ public struct SolanaSignedVersionedTransaction {
         self.transaction = transaction
         self.signatures = signatures
     }
+    
+    public var signatureDatas: [Data] {
+        return signatures.map({$0.data})
+    }
 }
 
 extension SolanaSignedVersionedTransaction: BorshCodable {
@@ -71,4 +75,20 @@ extension SolanaSignedVersionedTransaction: BorshCodable {
         signatures = try .init(from: &reader)
         transaction = try .init(from: &reader)
     }
+    
+    public func serializeAndBase58() throws -> String {
+        return try BorshEncoder().encode(self).bytes.base58EncodedString
+    }
+}
+
+
+extension SolanaSignedVersionedTransaction: SolanaHumanReadable {
+    
+    public func toHuman() -> Any {
+        return [
+            "transaction": transaction.toHuman(),
+            "signature": signatures.map({$0.base58Sting()})
+        ]
+    }
+    
 }
