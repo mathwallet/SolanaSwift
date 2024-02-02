@@ -12,6 +12,12 @@ public struct SolanaVersionedTransaction {
         return message.version
     }
     public var message: SolanaMessage
+    
+    public mutating func sign(keypair: SolanaKeyPair) throws -> SolanaSignedVersionedTransaction {
+        let digest = try BorshEncoder().encode(self.message)
+        let signature = SolanaSignature.init(data: try keypair.signDigest(messageDigest: digest))
+        return SolanaSignedVersionedTransaction(transaction: self, signatures: [signature])
+    }
 }
 
 extension SolanaVersionedTransaction: BorshCodable {
