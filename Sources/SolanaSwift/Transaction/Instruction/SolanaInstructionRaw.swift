@@ -37,10 +37,7 @@ extension SolanaInstructionRaw: SolanaHumanReadable {
         return [
             "type": "Unknown Type",
             "programId": programId.address,
-            "data": [
-                "keys": signers.map({$0.publicKey.address}),
-                "data": data.toHexString()
-            ]
+            "data": data.toHexString()
         ]
     }
 }

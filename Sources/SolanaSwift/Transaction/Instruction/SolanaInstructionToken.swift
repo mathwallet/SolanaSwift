@@ -48,7 +48,6 @@ extension SolanaInstructionToken: SolanaHumanReadable {
             "type": "Transfer Token",
             "programId": programId.address,
             "data": [
-                "keys": signers.map({$0.publicKey.address}),
                 "lamports": lamports.description
             ]
         ]

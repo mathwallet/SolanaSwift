@@ -37,10 +37,7 @@ extension SolanaInstructionAssociatedAccount: SolanaHumanReadable {
     public func toHuman() -> Any {
         return [
             "type": "Associated Account",
-            "programId": programId.address,
-            "data": [
-                "keys": signers.map({$0.publicKey.address})
-            ]
+            "programId": programId.address
         ]
     }
 }
