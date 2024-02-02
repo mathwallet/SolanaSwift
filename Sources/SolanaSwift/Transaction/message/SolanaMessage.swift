@@ -53,7 +53,7 @@ extension SolanaMessageLegacy {
     public func toHuman() -> Any {
         var instructions: [SolanaInstruction] = []
         for i in compiledInstructions {
-            guard Int(i.programIdIndex) < self.compiledInstructions.count else { continue }
+            guard Int(i.programIdIndex) < self.staticAccountKeys.count else { continue }
             let programId = self.staticAccountKeys[Int(i.programIdIndex)]
             let decodeInstruction = SolanaInstructionDecoder.decode(programId: programId, data: i.data, signers: [])
             instructions.append(decodeInstruction)
@@ -75,6 +75,7 @@ public struct SolanaMessageV0: SolanaMessage {
     public var addressTableLookups: [SolanaMessageAddressTableLookup]
     
     public func serialize(to writer: inout Data) throws {
+        try self.version.byte!.serialize(to: &writer)
         try self.header.serialize(to: &writer)
         try self.staticAccountKeys.serialize(to: &writer)
         try self.recentBlockhash.serialize(to: &writer)
@@ -98,7 +99,7 @@ extension SolanaMessageV0 {
     public func toHuman() -> Any {
         var instructions: [SolanaInstruction] = []
         for i in compiledInstructions {
-            guard Int(i.programIdIndex) < self.compiledInstructions.count else { continue }
+            guard Int(i.programIdIndex) < self.staticAccountKeys.count else { continue }
             let programId = self.staticAccountKeys[Int(i.programIdIndex)]
             let decodeInstruction = SolanaInstructionDecoder.decode(programId: programId, data: i.data, signers: [])
             instructions.append(decodeInstruction)
