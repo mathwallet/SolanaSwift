@@ -45,7 +45,6 @@ extension SolanaInstructionTransfer: SolanaHumanReadable {
             "type": "Transfer",
             "programId": programId.address,
             "data": [
-                "keys": signers.map({$0.publicKey.address}),
                 "lamports": lamports.description
             ]
         ]

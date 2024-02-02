@@ -35,10 +35,7 @@ extension SolanaInstructionAssetOwner: SolanaHumanReadable {
     public func toHuman() -> Any {
         return [
             "type": "Asset Owner",
-            "programId": programId.address,
-            "data": [
-                "keys": signers.map({$0.publicKey.address})
-            ]
+            "programId": programId.address
         ]
     }
 }
