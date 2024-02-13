@@ -38,9 +38,8 @@ public struct SolanaSolanaTokenAccountsData:Codable {
 public struct SolanaSolanaTokenAccount:Codable {
     public var data:SolanaSolanaTokenAccountsData?
     public var executable:Bool?
-    public var lamports:Int32?
+    public var lamports:Int64?
     public var owner:String?
-    public var rentEpoch:Int?
 }
 
 public struct SolanaTokenAccountsByOwnerValue:Codable {
@@ -82,7 +81,6 @@ public struct SolanaAccountValueResult: Codable {
     public var lamports:Int64?
     public var executable:Bool?
     public var owner:String?
-    public var rentEpoch:Int64?
     public var data:[String]?
 }
 
