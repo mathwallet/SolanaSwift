@@ -26,8 +26,10 @@ extension SolanaVersionedTransaction: BorshCodable {
     }
     
     public init(from reader: inout BinaryReader) throws {
+        guard reader.cursor < reader.bytes.count else { throw BorshDecodingError.unknownData }
+        
         let ver: SolanaMessageVersion
-        guard let prefix: UInt8 = reader.bytes.first else { throw BorshDecodingError.unknownData }
+        let prefix: UInt8 = reader.bytes[reader.cursor]
         let maskedPrefix: UInt8 = (prefix & 0x7f)
         if maskedPrefix != prefix && maskedPrefix == 0 {
             ver = .v0
