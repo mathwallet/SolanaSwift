@@ -16,35 +16,36 @@ public typealias SolanaInstruction = SolanaInstructionBase & BorshCodable & Sola
 
 public struct SolanaInstructionDecoder {
     static func decode(programId: SolanaPublicKey, data: Data, signers: [SolanaSigner]) -> SolanaInstruction {
-        var reader = BinaryReader(bytes: data.bytes)
         if programId == SolanaPublicKey.SYSTEM_PROGRAM_ID {
             // SolanaInstructionTransfer
-            if var i = try? SolanaInstructionTransfer.init(from: &reader) {
+            if var i = try? BorshDecoder.decode(SolanaInstructionTransfer.self, from: data) {
                 i.signers = signers
                 return i
             }
-            // reader.cursor = 0
         } else if programId == SolanaPublicKey.TOKEN_PROGRAM_ID {
             // SolanaInstructionToken
-            if var i = try? SolanaInstructionToken.init(from: &reader) {
+            if var i = try? BorshDecoder.decode(SolanaInstructionToken.self, from: data) {
                 i.signers = signers
                 return i
             }
-            // reader.cursor = 0
         } else if programId == SolanaPublicKey.ASSOCIATED_TOKEN_PROGRAM_ID {
             // SolanaInstructionAssociatedAccount
-            if var i = try? SolanaInstructionAssociatedAccount(from: &reader) {
+            if var i = try? BorshDecoder.decode(SolanaInstructionAssociatedAccount.self, from: data){
                 i.signers = signers
                 return i
             }
-            // reader.cursor = 0
         } else if programId == SolanaPublicKey.OWNER_VALIDATION_PROGRAM_ID {
             // SolanaInstructionAssetOwner
-            if var i = try? SolanaInstructionAssetOwner(from: &reader) {
+            if var i = try? BorshDecoder.decode(SolanaInstructionAssetOwner.self, from: data) {
                 i.signers = signers
                 return i
             }
-            // reader.cursor = 0
+        } else if programId == SolanaPublicKey.COMPUTE_BUDGET_PROGRAM_ID {
+            // SolanaInstructionComputeBudget
+            if var i = try? BorshDecoder.decode(SolanaInstructionComputeBudget.self, from: data) {
+                i.signers = signers
+                return i
+            }
         }
         return SolanaInstructionRaw(programId: programId, signers: signers, data: data)
     }

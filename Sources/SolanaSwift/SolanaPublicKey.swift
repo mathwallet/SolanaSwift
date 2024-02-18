@@ -20,6 +20,7 @@ public struct SolanaPublicKey {
     public static let SYSVAR_RENT_PUBKEY = SolanaPublicKey(base58String: "SysvarRent111111111111111111111111111111111")!
     public static let OWNER_VALIDATION_PROGRAM_ID = SolanaPublicKey(base58String: "4MNPdKu9wFMvEeZBMt3Eipfs5ovVWTJb31pEXDJAAxX5")!
     public static let MATEDATA_PUBLICKEY = SolanaPublicKey(base58String: "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s")!
+    public static let COMPUTE_BUDGET_PROGRAM_ID = SolanaPublicKey(base58String: "ComputeBudget111111111111111111111111111111")!
     
     public let data: Data
     public var address:String {
