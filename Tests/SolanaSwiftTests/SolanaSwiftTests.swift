@@ -211,7 +211,35 @@ final class SolanaSwiftTests: XCTestCase {
         var data2 = Data()
         try signedTx.serialize(to: &data2)
         XCTAssertTrue(data2 == data)
+    }
+    
+    func testcreateVersionedTransaction() throws {
+        let recentBlockhash = SolanaBlockHash(base58String: "9h5dnhmz3vwL25RZ699ZGV7j1NvJ3C2HhPQPcjtDaqcH")!
+        // Legacy
+        let transferInstruction = SolanaInstructionTransfer(
+            from: SolanaPublicKey(base58String: "D37m1SKWnyY4fmhEntD84uZpjejUZkbHQUBEP3X74LuH")! ,
+            to:SolanaPublicKey(base58String: "GNutLCXQEEcmxkJH5f5rw51bTW2QcLGXqitmN3EaVPoV")!,
+            lamports: BigUInt(5000)
+        )
+        var transaction = SolanaTransaction()
+        transaction.recentBlockhash = recentBlockhash
+        transaction.appendInstruction(instruction: transferInstruction)
         
+        var data = Data()
+        try transaction.serialize(to: &data)
+        debugPrint(data.toHexString())
         
+        // New
+        let newTransfer = SolanaProgramSystem.transfer(
+            from: SolanaPublicKey(base58String: "D37m1SKWnyY4fmhEntD84uZpjejUZkbHQUBEP3X74LuH")!,
+            to: SolanaPublicKey(base58String: "GNutLCXQEEcmxkJH5f5rw51bTW2QcLGXqitmN3EaVPoV")!,
+            lamports: 5000
+        )
+        let newMessage = try SolanaMessageLegacy([newTransfer], blockhash: recentBlockhash)
+        let newTransaction = SolanaVersionedTransaction(message: newMessage)
+        
+        var newData = Data()
+        try newTransaction.serialize(to: &newData)
+        debugPrint(newData.toHexString())
     }
 }

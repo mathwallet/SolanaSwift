@@ -40,12 +40,6 @@ public struct SolanaInstructionDecoder {
                 i.signers = signers
                 return i
             }
-        } else if programId == SolanaPublicKey.COMPUTE_BUDGET_PROGRAM_ID {
-            // SolanaInstructionComputeBudget
-            if var i = try? BorshDecoder.decode(SolanaInstructionComputeBudget.self, from: data) {
-                i.signers = signers
-                return i
-            }
         }
         return SolanaInstructionRaw(programId: programId, signers: signers, data: data)
     }

@@ -47,6 +47,55 @@ public struct SolanaMessageLegacy: SolanaMessage {
         self.recentBlockhash = try .init(from: &reader)
         self.compiledInstructions = try .init(from: &reader)
     }
+    
+    public init(_ programs: [any SolanaProgramBase], blockhash: SolanaBlockHash, feePayer: SolanaPublicKey? = nil) throws {
+        // StaticAccountKeys
+        var tempSigners = [SolanaSigner]()
+        tempSigners.append(contentsOf: programs.flatMap({ $0.accounts }))
+        tempSigners.append(contentsOf: programs.map({ SolanaSigner(publicKey: $0.id) }))
+        // Deduplication
+        var signers = [SolanaSigner]()
+        for s in tempSigners {
+            if let i = signers.firstIndex(of: s){
+                signers[i].isSigner = signers[i].isSigner || s.isSigner
+                signers[i].isWritable = signers[i].isWritable || s.isWritable
+            } else {
+                signers.append(s)
+            }
+        }
+        // Sorted
+        signers = signers.sorted(by: <)
+        // Move fee payer to the front
+        if let payer = feePayer, let i = signers.map({ $0.publicKey }).firstIndex(of: payer), i > 0 {
+            signers.remove(at: i)
+            signers.insert(SolanaSigner(publicKey: payer, isSigner: true, isWritable: true), at: 0)
+        }
+        let publicKeys = signers.map({$0.publicKey})
+        self.staticAccountKeys = signers.map({$0.publicKey})
+        
+        // Header
+        self.header = SolanaMessageHeader(
+            numRequiredSignatures: UInt8(signers.filter({ $0.isSigner }).count),
+            numReadonlySignedAccounts: UInt8(signers.filter({ $0.isSigner && !$0.isWritable }).count),
+            numReadonlyUnsignedAccounts: UInt8(signers.filter({ !$0.isSigner && !$0.isWritable }).count)
+        )
+        // Compiled Instruction
+        self.compiledInstructions = []
+        for program in programs {
+            let programIdIndex = UInt8(publicKeys.firstIndex(of: program.id)!)
+            let accountKeyIndexes = program.accounts.map({ UInt8(publicKeys.firstIndex(of: $0.publicKey)!) })
+            let data = try BorshEncoder().encode(program.instruction)
+            
+            let compiledInstruction = SolanaMessageCompiledInstruction(
+                programIdIndex: programIdIndex,
+                accountKeyIndexes: accountKeyIndexes,
+                data: data
+            )
+            self.compiledInstructions.append(compiledInstruction)
+        }
+        // Recent Blockhash
+        self.recentBlockhash = blockhash
+    }
 }
 
 extension SolanaMessageLegacy {

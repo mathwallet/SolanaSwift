@@ -19,7 +19,6 @@ public struct SolanaTransaction {
         tempSigners.append(contentsOf: self.instructions.flatMap({ $0.signers }))
         tempSigners.append(contentsOf: self.instructions.map({ SolanaSigner(publicKey: $0.programId) }))
         
-        
         // 去重
         var uniqueSigners = [SolanaSigner]()
         for s in tempSigners {

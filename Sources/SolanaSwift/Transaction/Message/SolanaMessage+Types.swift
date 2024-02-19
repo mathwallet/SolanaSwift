@@ -12,6 +12,12 @@ public struct SolanaMessageHeader: BorshCodable {
     public var numReadonlySignedAccounts: UInt8
     public var numReadonlyUnsignedAccounts: UInt8
     
+    public init(numRequiredSignatures: UInt8, numReadonlySignedAccounts: UInt8, numReadonlyUnsignedAccounts: UInt8) {
+        self.numRequiredSignatures = numRequiredSignatures
+        self.numReadonlySignedAccounts = numReadonlySignedAccounts
+        self.numReadonlyUnsignedAccounts = numReadonlyUnsignedAccounts
+    }
+    
     public func serialize(to writer: inout Data) throws {
         try self.numRequiredSignatures.serialize(to: &writer)
         try self.numReadonlySignedAccounts.serialize(to: &writer)
@@ -30,6 +36,12 @@ public struct SolanaMessageAddressTableLookup: BorshCodable {
     public var writableIndexes: [UInt8]
     public var readonlyIndexes: [UInt8]
     
+    public init(accountKey: SolanaPublicKey, writableIndexes: [UInt8], readonlyIndexes: [UInt8]) {
+        self.accountKey = accountKey
+        self.writableIndexes = writableIndexes
+        self.readonlyIndexes = readonlyIndexes
+    }
+    
     public func serialize(to writer: inout Data) throws {
         try self.accountKey.serialize(to: &writer)
         try self.writableIndexes.serialize(to: &writer)
@@ -47,6 +59,12 @@ public struct SolanaMessageCompiledInstruction: BorshCodable {
     public var programIdIndex: UInt8
     public var accountKeyIndexes: [UInt8]
     public var data: Data
+    
+    public init(programIdIndex: UInt8, accountKeyIndexes: [UInt8], data: Data) {
+        self.programIdIndex = programIdIndex
+        self.accountKeyIndexes = accountKeyIndexes
+        self.data = data
+    }
     
     public func serialize(to writer: inout Data) throws {
         try self.programIdIndex.serialize(to: &writer)
