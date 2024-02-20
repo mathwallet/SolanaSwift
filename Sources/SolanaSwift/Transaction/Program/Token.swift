@@ -62,12 +62,12 @@ public struct SolanaProgramToken: SolanaProgramBase {
         )
     }
     
-    public static func transfer(from: SolanaPublicKey, to: SolanaPublicKey, token: SolanaPublicKey, amount: UInt64) -> Self {
+    public static func transfer(source: SolanaPublicKey, destination: SolanaPublicKey, owner: SolanaPublicKey, amount: UInt64) -> Self {
         return .init(
             accounts: [
-                SolanaSigner(publicKey: token, isSigner: false, isWritable: true),
-                SolanaSigner(publicKey: to, isSigner: false, isWritable: true),
-                SolanaSigner(publicKey: from, isSigner: true, isWritable: true)
+                SolanaSigner(publicKey: source, isSigner: false, isWritable: true),
+                SolanaSigner(publicKey: destination, isSigner: false, isWritable: true),
+                SolanaSigner(publicKey: owner, isSigner: true, isWritable: true)
             ],
             instruction: .Transfer(amount: amount)
         )
