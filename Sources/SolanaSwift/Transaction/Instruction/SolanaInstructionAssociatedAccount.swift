@@ -32,7 +32,7 @@ extension SolanaInstructionAssociatedAccount: BorshCodable {
     
     public init(from reader: inout BinaryReader) throws {
         // Instruction Type
-        guard try UInt8.init(from: &reader)  == 3 else {
+        guard try UInt8.init(from: &reader) == 0 else {
             throw BorshDecodingError.unknownData
         }
         signers = []
