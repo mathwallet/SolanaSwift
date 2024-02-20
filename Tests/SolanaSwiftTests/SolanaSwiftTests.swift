@@ -213,7 +213,7 @@ final class SolanaSwiftTests: XCTestCase {
         XCTAssertTrue(data2 == data)
     }
     
-    func testcreateVersionedTransaction() throws {
+    func testCreateVersionedTransaction() throws {
         let recentBlockhash = SolanaBlockHash(base58String: "9h5dnhmz3vwL25RZ699ZGV7j1NvJ3C2HhPQPcjtDaqcH")!
         // Legacy
         let transferInstruction = SolanaInstructionTransfer(
@@ -221,9 +221,16 @@ final class SolanaSwiftTests: XCTestCase {
             to:SolanaPublicKey(base58String: "GNutLCXQEEcmxkJH5f5rw51bTW2QcLGXqitmN3EaVPoV")!,
             lamports: BigUInt(5000)
         )
+        let associatedInstruction = SolanaInstructionAssociatedAccount(
+            funding: SolanaPublicKey(base58String: "D37m1SKWnyY4fmhEntD84uZpjejUZkbHQUBEP3X74LuH")!,
+            wallet:  SolanaPublicKey(base58String: "4KxYRXTZ4PXXDCvaQeG75HLJFdKrwVY6bX5nckp8jpHh")!,
+            associatedToken: SolanaPublicKey(base58String: "CoPhcr5DrGZx6a3pbB2BmrTHjNAokZScQVUdyqCNWyRR")!,
+            mint: SolanaPublicKey(base58String: "GeDS162t9yGJuLEHPWXXGrb1zwkzinCgRwnT8vHYjKza")!
+        )
         var transaction = SolanaTransaction()
         transaction.recentBlockhash = recentBlockhash
         transaction.appendInstruction(instruction: transferInstruction)
+        transaction.appendInstruction(instruction: associatedInstruction)
         
         var data = Data()
         try transaction.serialize(to: &data)
@@ -235,7 +242,13 @@ final class SolanaSwiftTests: XCTestCase {
             to: SolanaPublicKey(base58String: "GNutLCXQEEcmxkJH5f5rw51bTW2QcLGXqitmN3EaVPoV")!,
             lamports: 5000
         )
-        let newMessage = try SolanaMessageLegacy([newTransfer], blockhash: recentBlockhash)
+        let newAssociatedTokenAccount = SolanaProgramAssociatedTokenAccount.create(
+            funder: SolanaPublicKey(base58String: "D37m1SKWnyY4fmhEntD84uZpjejUZkbHQUBEP3X74LuH")!,
+            associatedToken: SolanaPublicKey(base58String: "CoPhcr5DrGZx6a3pbB2BmrTHjNAokZScQVUdyqCNWyRR")!,
+            owner: SolanaPublicKey(base58String: "4KxYRXTZ4PXXDCvaQeG75HLJFdKrwVY6bX5nckp8jpHh")!,
+            mint: SolanaPublicKey(base58String: "GeDS162t9yGJuLEHPWXXGrb1zwkzinCgRwnT8vHYjKza")!
+        )
+        let newMessage = try SolanaMessageLegacy([newTransfer, newAssociatedTokenAccount], blockhash: recentBlockhash)
         let newTransaction = SolanaVersionedTransaction(message: newMessage)
         
         var newData = Data()
