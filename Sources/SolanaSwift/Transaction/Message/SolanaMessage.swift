@@ -71,7 +71,6 @@ public struct SolanaMessageLegacy: SolanaMessage {
             signers.insert(SolanaSigner(publicKey: payer, isSigner: true, isWritable: true), at: 0)
         }
         let publicKeys = signers.map({$0.publicKey})
-        self.staticAccountKeys = signers.map({$0.publicKey})
         
         // Header
         self.header = SolanaMessageHeader(
@@ -79,6 +78,10 @@ public struct SolanaMessageLegacy: SolanaMessage {
             numReadonlySignedAccounts: UInt8(signers.filter({ $0.isSigner && !$0.isWritable }).count),
             numReadonlyUnsignedAccounts: UInt8(signers.filter({ !$0.isSigner && !$0.isWritable }).count)
         )
+        // Accounts
+        self.staticAccountKeys = signers.map({$0.publicKey})
+        // Recent Blockhash
+        self.recentBlockhash = blockhash
         // Compiled Instruction
         self.compiledInstructions = []
         for program in programs {
@@ -93,8 +96,6 @@ public struct SolanaMessageLegacy: SolanaMessage {
             )
             self.compiledInstructions.append(compiledInstruction)
         }
-        // Recent Blockhash
-        self.recentBlockhash = blockhash
     }
 }
 

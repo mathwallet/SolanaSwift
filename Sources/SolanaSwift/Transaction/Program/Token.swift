@@ -34,6 +34,8 @@ public enum TokenInstruction: BorshCodable {
     public init(from reader: inout BinaryReader) throws {
         let type = try UInt8.init(from: &reader)
         switch type {
+        case 1:
+            self = .InitializeAccount
         case 3:
             let amount = try UInt64.init(from: &reader)
             self = .Transfer(amount: amount)
@@ -64,8 +66,8 @@ public struct SolanaProgramToken: SolanaProgramBase {
         return .init(
             accounts: [
                 SolanaSigner(publicKey: token, isSigner: false, isWritable: true),
-                SolanaSigner(publicKey: from, isSigner: true, isWritable: true),
-                SolanaSigner(publicKey: to, isSigner: false, isWritable: true)
+                SolanaSigner(publicKey: to, isSigner: false, isWritable: true),
+                SolanaSigner(publicKey: from, isSigner: true, isWritable: true)
             ],
             instruction: .Transfer(amount: amount)
         )
