@@ -9,25 +9,31 @@ import Foundation
 import BigInt
 
 public enum SystemInstruction: BorshCodable {
-    case Create(owner: SolanaPublicKey, lamports: UInt64, space: UInt64)
+    case CreateAccount(owner: SolanaPublicKey, lamports: UInt64, space: UInt64)
     case Assign(owner: SolanaPublicKey)
     case Transfer(lamports: UInt64)
+    case InitializeNonceAccount(auth: SolanaPublicKey)
+    case Allocate(space: UInt64)
     
     var type: UInt32 {
         switch self {
-        case .Create:
+        case .CreateAccount:
             return 0
         case .Assign:
             return 1
         case .Transfer:
             return 2
+        case .InitializeNonceAccount:
+            return 6
+        case .Allocate:
+            return 8
         }
     }
     
     public func serialize(to writer: inout Data) throws {
         try self.type.serialize(to: &writer)
         switch self {
-        case .Create(let owner, let lamports, let space):
+        case .CreateAccount(let owner, let lamports, let space):
             try lamports.serialize(to: &writer)
             try space.serialize(to: &writer)
             try owner.serialize(to: &writer)
@@ -35,6 +41,10 @@ public enum SystemInstruction: BorshCodable {
             try owner.serialize(to: &writer)
         case .Transfer(let lamports):
             try lamports.serialize(to: &writer)
+        case .InitializeNonceAccount(let auth):
+            try auth.serialize(to: &writer)
+        case .Allocate(let space):
+            try space.serialize(to: &writer)
         }
     }
     
@@ -45,13 +55,19 @@ public enum SystemInstruction: BorshCodable {
             let owner = try SolanaPublicKey.init(from: &reader)
             let lamports = try UInt64.init(from: &reader)
             let space = try UInt64.init(from: &reader)
-            self = .Create(owner: owner, lamports: lamports, space: space)
+            self = .CreateAccount(owner: owner, lamports: lamports, space: space)
         case 1:
             let owner = try SolanaPublicKey.init(from: &reader)
             self = .Assign(owner: owner)
         case 2:
             let lamports = try UInt64.init(from: &reader)
             self = .Transfer(lamports: lamports)
+        case 6:
+            let auth = try SolanaPublicKey.init(from: &reader)
+            self = .InitializeNonceAccount(auth: auth)
+        case 8:
+            let space = try UInt64.init(from: &reader)
+            self = .Allocate(space: space)
         default:
             throw BorshDecodingError.unknownData
         }
@@ -63,13 +79,13 @@ public struct SolanaProgramSystem: SolanaProgramBase {
     public var accounts: [SolanaSigner]
     public var instruction: SystemInstruction
     
-    public static func create(from: SolanaPublicKey, new: SolanaPublicKey, owner: SolanaPublicKey, lamports: UInt64, space: UInt64) -> Self {
+    public static func CreateAccount(from: SolanaPublicKey, new: SolanaPublicKey, owner: SolanaPublicKey, lamports: UInt64, space: UInt64) -> Self {
         return .init(
             accounts: [
                 SolanaSigner(publicKey: from, isSigner: true, isWritable: true),
                 SolanaSigner(publicKey: new, isSigner: true, isWritable: true)
             ],
-            instruction: .Create(owner: owner, lamports: lamports, space: space)
+            instruction: .CreateAccount(owner: owner, lamports: lamports, space: space)
         )
     }
     
@@ -89,6 +105,26 @@ public struct SolanaProgramSystem: SolanaProgramBase {
                 SolanaSigner(publicKey: to, isSigner: false, isWritable: true)
             ],
             instruction: .Transfer(lamports: lamports)
+        )
+    }
+    
+    public static func initializeNonceAccount(nonce: SolanaPublicKey, auth: SolanaPublicKey) -> Self {
+        return .init(
+            accounts: [
+                SolanaSigner(publicKey: nonce, isSigner: false, isWritable: true),
+                SolanaSigner(publicKey: .SYSVAR_RECENT_BLOCK_HASHES_PUBKEY, isSigner: false, isWritable: false),
+                SolanaSigner(publicKey: .SYSVAR_RENT_PUBKEY, isSigner: false, isWritable: false)
+            ],
+            instruction: .InitializeNonceAccount(auth: auth)
+        )
+    }
+    
+    public static func allocate(account: SolanaPublicKey, space: UInt64) -> Self {
+        return .init(
+            accounts: [
+                SolanaSigner(publicKey: account, isSigner: true, isWritable: true)
+            ],
+            instruction: .Allocate(space: space)
         )
     }
 }
