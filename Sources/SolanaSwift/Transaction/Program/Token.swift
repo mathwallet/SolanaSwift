@@ -8,12 +8,15 @@
 import Foundation
 import BigInt
 
-public enum TokenInstruction: BorshCodable {
+public enum SolanaProgramToken: BorshCodable {
+    case InitializeMint(decimals: UInt8, authority: SolanaPublicKey, freezeAuthority: SolanaPublicKey?)
     case InitializeAccount
     case Transfer(amount: UInt64)
     
     var type: UInt8 {
         switch self {
+        case .InitializeMint:
+            return 0
         case .InitializeAccount:
             return 1
         case .Transfer:
@@ -24,6 +27,12 @@ public enum TokenInstruction: BorshCodable {
     public func serialize(to writer: inout Data) throws {
         try self.type.serialize(to: &writer)
         switch self {
+        case .InitializeMint(let decimals, let authority, let freezeAuthority):
+            try decimals.serialize(to: &writer)
+            try authority.serialize(to: &writer)
+            
+            let freezeAuthorityOpt: Optional<SolanaPublicKey> = freezeAuthority
+            try freezeAuthorityOpt.serialize(to: &writer)
         case .InitializeAccount:
             break
         case .Transfer(let amount):
@@ -34,6 +43,11 @@ public enum TokenInstruction: BorshCodable {
     public init(from reader: inout BinaryReader) throws {
         let type = try UInt8.init(from: &reader)
         switch type {
+        case 0:
+            let decimals = try UInt8.init(from: &reader)
+            let authority = try SolanaPublicKey.init(from: &reader)
+            let freezeAuthority = try Optional<SolanaPublicKey>.init(from: &reader)
+            self = .InitializeMint(decimals: decimals, authority: authority, freezeAuthority: freezeAuthority)
         case 1:
             self = .InitializeAccount
         case 3:
@@ -45,31 +59,42 @@ public enum TokenInstruction: BorshCodable {
     }
 }
 
-public struct SolanaProgramToken: SolanaProgramBase {
-    public let id: SolanaPublicKey = SolanaPublicKey.TOKEN_PROGRAM_ID
-    public var accounts: [SolanaSigner]
-    public var instruction: TokenInstruction
+extension SolanaProgramToken: SolanaBaseProgram  {
+    public static var id: SolanaPublicKey = SolanaPublicKey.TOKEN_PROGRAM_ID
     
-    public static func initializeAccount(account: SolanaPublicKey, mint: SolanaPublicKey, owner: SolanaPublicKey) -> Self {
+    public static func initializeMint(mint: SolanaPublicKey, decimals: UInt8, authority: SolanaPublicKey, freezeAuthority: SolanaPublicKey?) -> SolanaMessageInstruction {
         return .init(
+            programId: Self.id,
+            accounts: [
+                SolanaSigner(publicKey: mint, isSigner: false, isWritable: true),
+                SolanaSigner(publicKey: .SYSVAR_RENT_PUBKEY, isSigner: false, isWritable: false)
+            ],
+            data: Self.InitializeMint(decimals: decimals, authority: authority, freezeAuthority: freezeAuthority)
+        )
+    }
+    
+    public static func initializeAccount(account: SolanaPublicKey, mint: SolanaPublicKey, owner: SolanaPublicKey) -> SolanaMessageInstruction {
+        return .init(
+            programId: Self.id,
             accounts: [
                 SolanaSigner(publicKey: account, isSigner: false, isWritable: true),
                 SolanaSigner(publicKey: mint, isSigner: false, isWritable: false),
                 SolanaSigner(publicKey: owner, isSigner: false, isWritable: false),
                 SolanaSigner(publicKey: .SYSVAR_RENT_PUBKEY, isSigner: false, isWritable: false)
             ],
-            instruction: .InitializeAccount
+            data: Self.InitializeAccount
         )
     }
     
-    public static func transfer(source: SolanaPublicKey, destination: SolanaPublicKey, owner: SolanaPublicKey, amount: UInt64) -> Self {
+    public static func transfer(source: SolanaPublicKey, destination: SolanaPublicKey, owner: SolanaPublicKey, amount: UInt64) -> SolanaMessageInstruction {
         return .init(
+            programId: Self.id,
             accounts: [
                 SolanaSigner(publicKey: source, isSigner: false, isWritable: true),
                 SolanaSigner(publicKey: destination, isSigner: false, isWritable: true),
                 SolanaSigner(publicKey: owner, isSigner: true, isWritable: true)
             ],
-            instruction: .Transfer(amount: amount)
+            data: Self.Transfer(amount: amount)
         )
     }
 }

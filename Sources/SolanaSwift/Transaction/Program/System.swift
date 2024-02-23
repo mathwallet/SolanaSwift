@@ -8,7 +8,7 @@
 import Foundation
 import BigInt
 
-public enum SystemInstruction: BorshCodable {
+public enum SolanaProgramSystem: BorshCodable {
     case CreateAccount(owner: SolanaPublicKey, lamports: UInt64, space: UInt64)
     case Assign(owner: SolanaPublicKey)
     case Transfer(lamports: UInt64)
@@ -74,57 +74,60 @@ public enum SystemInstruction: BorshCodable {
     }
 }
 
-public struct SolanaProgramSystem: SolanaProgramBase {
-    public let id: SolanaPublicKey = SolanaPublicKey.SYSTEM_PROGRAM_ID
-    public var accounts: [SolanaSigner]
-    public var instruction: SystemInstruction
+extension SolanaProgramSystem: SolanaBaseProgram {
+    public static var id: SolanaPublicKey = SolanaPublicKey.SYSTEM_PROGRAM_ID
     
-    public static func CreateAccount(from: SolanaPublicKey, new: SolanaPublicKey, owner: SolanaPublicKey, lamports: UInt64, space: UInt64) -> Self {
+    public static func CreateAccount(from: SolanaPublicKey, new: SolanaPublicKey, owner: SolanaPublicKey, lamports: UInt64, space: UInt64) -> SolanaMessageInstruction {
         return .init(
+            programId: Self.id,
             accounts: [
                 SolanaSigner(publicKey: from, isSigner: true, isWritable: true),
                 SolanaSigner(publicKey: new, isSigner: true, isWritable: true)
             ],
-            instruction: .CreateAccount(owner: owner, lamports: lamports, space: space)
+            data: Self.CreateAccount(owner: owner, lamports: lamports, space: space)
         )
     }
     
-    public static func assign(from: SolanaPublicKey, owner: SolanaPublicKey) -> Self {
+    public static func assign(from: SolanaPublicKey, owner: SolanaPublicKey) -> SolanaMessageInstruction {
         return .init(
+            programId: Self.id,
             accounts: [
                 SolanaSigner(publicKey: from, isSigner: true, isWritable: true)
             ],
-            instruction: .Assign(owner: owner)
+            data: Self.Assign(owner: owner)
         )
     }
     
-    public static func transfer(from: SolanaPublicKey, to: SolanaPublicKey, lamports: UInt64) -> Self {
+    public static func transfer(from: SolanaPublicKey, to: SolanaPublicKey, lamports: UInt64) -> SolanaMessageInstruction {
         return .init(
+            programId: Self.id,
             accounts: [
                 SolanaSigner(publicKey: from, isSigner: true, isWritable: true),
                 SolanaSigner(publicKey: to, isSigner: false, isWritable: true)
             ],
-            instruction: .Transfer(lamports: lamports)
+            data: Self.Transfer(lamports: lamports)
         )
     }
     
-    public static func initializeNonceAccount(nonce: SolanaPublicKey, auth: SolanaPublicKey) -> Self {
+    public static func initializeNonceAccount(nonce: SolanaPublicKey, auth: SolanaPublicKey) -> SolanaMessageInstruction {
         return .init(
+            programId: Self.id,
             accounts: [
                 SolanaSigner(publicKey: nonce, isSigner: false, isWritable: true),
                 SolanaSigner(publicKey: .SYSVAR_RECENT_BLOCK_HASHES_PUBKEY, isSigner: false, isWritable: false),
                 SolanaSigner(publicKey: .SYSVAR_RENT_PUBKEY, isSigner: false, isWritable: false)
             ],
-            instruction: .InitializeNonceAccount(auth: auth)
+            data: Self.InitializeNonceAccount(auth: auth)
         )
     }
     
-    public static func allocate(account: SolanaPublicKey, space: UInt64) -> Self {
+    public static func allocate(account: SolanaPublicKey, space: UInt64) -> SolanaMessageInstruction {
         return .init(
+            programId: Self.id,
             accounts: [
                 SolanaSigner(publicKey: account, isSigner: true, isWritable: true)
             ],
-            instruction: .Allocate(space: space)
+            data: Self.Allocate(space: space)
         )
     }
 }

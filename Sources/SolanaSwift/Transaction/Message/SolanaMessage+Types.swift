@@ -81,3 +81,15 @@ public struct SolanaMessageCompiledInstruction: BorshCodable {
         self.data = Data(reader.read(count: dataCount))
     }
 }
+
+public struct SolanaMessageInstruction {
+    public var programId: SolanaPublicKey
+    public var accounts: [SolanaSigner]
+    public var data: BorshCodable
+    
+    public init(programId: SolanaPublicKey, accounts: [SolanaSigner], data: BorshCodable) {
+        self.programId = programId
+        self.accounts = accounts
+        self.data = data
+    }
+}

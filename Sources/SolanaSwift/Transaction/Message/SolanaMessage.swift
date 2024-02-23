@@ -48,11 +48,11 @@ public struct SolanaMessageLegacy: SolanaMessage {
         self.compiledInstructions = try .init(from: &reader)
     }
     
-    public init(_ programs: [any SolanaProgramBase], blockhash: SolanaBlockHash, feePayer: SolanaPublicKey? = nil) throws {
+    public init(_ instructions: [SolanaMessageInstruction], blockhash: SolanaBlockHash = .EMPTY, feePayer: SolanaPublicKey? = nil) throws {
         // StaticAccountKeys
         var tempSigners = [SolanaSigner]()
-        tempSigners.append(contentsOf: programs.flatMap({ $0.accounts }))
-        tempSigners.append(contentsOf: programs.map({ SolanaSigner(publicKey: $0.id) }))
+        tempSigners.append(contentsOf: instructions.flatMap({ $0.accounts }))
+        tempSigners.append(contentsOf: instructions.map({ SolanaSigner(publicKey: $0.programId) }))
         // Deduplication
         var signers = [SolanaSigner]()
         for s in tempSigners {
@@ -84,10 +84,10 @@ public struct SolanaMessageLegacy: SolanaMessage {
         self.recentBlockhash = blockhash
         // Compiled Instruction
         self.compiledInstructions = []
-        for program in programs {
-            let programIdIndex = UInt8(publicKeys.firstIndex(of: program.id)!)
-            let accountKeyIndexes = program.accounts.map({ UInt8(publicKeys.firstIndex(of: $0.publicKey)!) })
-            let data = try BorshEncoder().encode(program.instruction)
+        for instruction in instructions {
+            let programIdIndex = UInt8(publicKeys.firstIndex(of: instruction.programId)!)
+            let accountKeyIndexes = instruction.accounts.map({ UInt8(publicKeys.firstIndex(of: $0.publicKey)!) })
+            let data = try BorshEncoder().encode(instruction.data)
             
             let compiledInstruction = SolanaMessageCompiledInstruction(
                 programIdIndex: programIdIndex,

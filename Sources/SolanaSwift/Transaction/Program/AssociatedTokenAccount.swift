@@ -8,7 +8,7 @@
 import Foundation
 import BigInt
 
-public enum AssociatedTokenAccountInstruction: BorshCodable {
+public enum SolanaProgramAssociatedTokenAccount: BorshCodable {
     case Create
     case CreateIdempotent
     case RecoverNested
@@ -47,13 +47,12 @@ public enum AssociatedTokenAccountInstruction: BorshCodable {
     }
 }
 
-public struct SolanaProgramAssociatedTokenAccount: SolanaProgramBase {
-    public let id: SolanaPublicKey = .ASSOCIATED_TOKEN_PROGRAM_ID
-    public var accounts: [SolanaSigner]
-    public var instruction: AssociatedTokenAccountInstruction
+extension SolanaProgramAssociatedTokenAccount: SolanaBaseProgram {
+    public static var id: SolanaPublicKey = .ASSOCIATED_TOKEN_PROGRAM_ID
     
-    public static func create(funder: SolanaPublicKey, associatedToken: SolanaPublicKey, owner: SolanaPublicKey, mint: SolanaPublicKey) -> Self {
+    public static func create(funder: SolanaPublicKey, associatedToken: SolanaPublicKey, owner: SolanaPublicKey, mint: SolanaPublicKey) -> SolanaMessageInstruction {
         return .init(
+            programId: Self.id,
             accounts: [
                 SolanaSigner(publicKey: funder, isSigner: true, isWritable: true),
                 SolanaSigner(publicKey: associatedToken, isSigner: false, isWritable: true),
@@ -63,12 +62,13 @@ public struct SolanaProgramAssociatedTokenAccount: SolanaProgramBase {
                 SolanaSigner(publicKey: .TOKEN_PROGRAM_ID, isSigner: false, isWritable: false),
                 SolanaSigner(publicKey: .SYSVAR_RENT_PUBKEY, isSigner: false, isWritable: false)
             ],
-            instruction: .Create
+            data: Self.Create
         )
     }
     
-    public static func createIdempotent(funder: SolanaPublicKey, associatedTokenAccount: SolanaPublicKey, owner: SolanaPublicKey, mint: SolanaPublicKey) -> Self {
+    public static func createIdempotent(funder: SolanaPublicKey, associatedTokenAccount: SolanaPublicKey, owner: SolanaPublicKey, mint: SolanaPublicKey) throws -> SolanaMessageInstruction {
         return .init(
+            programId: Self.id,
             accounts: [
                 SolanaSigner(publicKey: funder, isSigner: true, isWritable: true),
                 SolanaSigner(publicKey: associatedTokenAccount, isSigner: false, isWritable: true),
@@ -78,12 +78,13 @@ public struct SolanaProgramAssociatedTokenAccount: SolanaProgramBase {
                 SolanaSigner(publicKey: .TOKEN_PROGRAM_ID, isSigner: false, isWritable: false),
                 SolanaSigner(publicKey: .SYSVAR_RENT_PUBKEY, isSigner: false, isWritable: false)
             ],
-            instruction: .CreateIdempotent
+            data: Self.CreateIdempotent
         )
     }
     
-    public static func recoverNested(owner: SolanaPublicKey, ownerMint: SolanaPublicKey, ownerAssociatedTokenAccount: SolanaPublicKey, nestedMint: SolanaPublicKey, nestedMintAssociatedTokenAccount: SolanaPublicKey, destinationAssociatedTokenAccount: SolanaPublicKey) -> Self {
+    public static func recoverNested(owner: SolanaPublicKey, ownerMint: SolanaPublicKey, ownerAssociatedTokenAccount: SolanaPublicKey, nestedMint: SolanaPublicKey, nestedMintAssociatedTokenAccount: SolanaPublicKey, destinationAssociatedTokenAccount: SolanaPublicKey) -> SolanaMessageInstruction {
         return .init(
+            programId: Self.id,
             accounts: [
                 SolanaSigner(publicKey: nestedMintAssociatedTokenAccount, isSigner: false, isWritable: true),
                 SolanaSigner(publicKey: nestedMint, isSigner: false, isWritable: false),
@@ -93,7 +94,7 @@ public struct SolanaProgramAssociatedTokenAccount: SolanaProgramBase {
                 SolanaSigner(publicKey: owner, isSigner: true, isWritable: true),
                 SolanaSigner(publicKey: .TOKEN_PROGRAM_ID, isSigner: false, isWritable: false)
             ],
-            instruction: .RecoverNested
+            data: Self.RecoverNested
         )
     }
 }

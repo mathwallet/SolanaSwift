@@ -8,7 +8,7 @@
 import Foundation
 import BigInt
 
-public enum ComputeBudgetInstruction: BorshCodable {
+public enum SolanaProgramComputeBudget: BorshCodable {
     case RequestUnits(units: UInt32, additionalFee: UInt32)
     case RequestHeapFrame(bytes: UInt32)
     case SetComputeUnitLimit(units: UInt32)
@@ -64,36 +64,38 @@ public enum ComputeBudgetInstruction: BorshCodable {
     }
 }
 
-extension ComputeBudgetInstruction: SolanaHumanReadable {
-    public func toHuman() -> Any {
-        switch self {
-        case .RequestUnits(let units, let additionalFee):
-            return [
-                "type": "RequestUnits",
-                "units": units.description,
-                "additionalFee": additionalFee.description
-            ]
-        case .RequestHeapFrame(let bytes):
-            return [
-                "type": "RequestHeapFrame",
-                "bytes": bytes.description
-            ]
-        case .SetComputeUnitLimit(let units):
-            return [
-                "type": "SetComputeUnitLimit",
-                "units": units.description
-            ]
-        case .SetComputeUnitPrice(let microLamports):
-            return [
-                "type": "SetComputeUnitPrice",
-                "microLamports": microLamports.description
-            ]
-        }
+extension SolanaProgramComputeBudget: SolanaBaseProgram {
+    public static var id: SolanaPublicKey = SolanaPublicKey.COMPUTE_BUDGET_PROGRAM_ID
+    
+    public static func requestUnits(units: UInt32, additionalFee: UInt32) -> SolanaMessageInstruction {
+        return .init(
+            programId: Self.id,
+            accounts: [],
+            data: Self.RequestUnits(units: units, additionalFee: additionalFee)
+        )
     }
-}
-
-public struct SolanaProgramComputeBudget: SolanaProgramBase {
-    public let id: SolanaPublicKey = SolanaPublicKey.COMPUTE_BUDGET_PROGRAM_ID
-    public var accounts: [SolanaSigner]
-    public var instruction: ComputeBudgetInstruction
+    
+    public static func requestHeapFrame(bytes: UInt32) -> SolanaMessageInstruction {
+        return .init(
+            programId: Self.id,
+            accounts: [],
+            data: Self.RequestHeapFrame(bytes: bytes)
+        )
+    }
+    
+    public static func setComputeUnitLimit(units: UInt32) -> SolanaMessageInstruction {
+        return .init(
+            programId: Self.id,
+            accounts: [],
+            data: Self.SetComputeUnitLimit(units: units)
+        )
+    }
+    
+    public static func setComputeUnitPrice(microLamports: UInt64) -> SolanaMessageInstruction {
+        return .init(
+            programId: Self.id,
+            accounts: [],
+            data: Self.SetComputeUnitPrice(microLamports: microLamports)
+        )
+    }
 }

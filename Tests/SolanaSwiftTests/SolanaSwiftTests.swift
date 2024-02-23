@@ -214,45 +214,45 @@ final class SolanaSwiftTests: XCTestCase {
     }
     
     func testCreateVersionedTransaction() throws {
-        let recentBlockhash = SolanaBlockHash(base58String: "9h5dnhmz3vwL25RZ699ZGV7j1NvJ3C2HhPQPcjtDaqcH")!
         // Legacy
-        let transferInstruction = SolanaInstructionTransfer(
-            from: SolanaPublicKey(base58String: "D37m1SKWnyY4fmhEntD84uZpjejUZkbHQUBEP3X74LuH")! ,
-            to:SolanaPublicKey(base58String: "GNutLCXQEEcmxkJH5f5rw51bTW2QcLGXqitmN3EaVPoV")!,
-            lamports: BigUInt(5000)
-        )
-        let associatedInstruction = SolanaInstructionAssociatedAccount(
-            funding: SolanaPublicKey(base58String: "D37m1SKWnyY4fmhEntD84uZpjejUZkbHQUBEP3X74LuH")!,
-            wallet:  SolanaPublicKey(base58String: "4KxYRXTZ4PXXDCvaQeG75HLJFdKrwVY6bX5nckp8jpHh")!,
-            associatedToken: SolanaPublicKey(base58String: "CoPhcr5DrGZx6a3pbB2BmrTHjNAokZScQVUdyqCNWyRR")!,
-            mint: SolanaPublicKey(base58String: "GeDS162t9yGJuLEHPWXXGrb1zwkzinCgRwnT8vHYjKza")!
-        )
         var transaction = SolanaTransaction()
-        transaction.recentBlockhash = recentBlockhash
-        transaction.appendInstruction(instruction: transferInstruction)
-        transaction.appendInstruction(instruction: associatedInstruction)
-        
-        var data = Data()
-        try transaction.serialize(to: &data)
-        debugPrint(data.toHexString())
+        transaction.appendInstructions(instructions: [
+            SolanaInstructionTransfer(
+                from: SolanaPublicKey(base58String: "D37m1SKWnyY4fmhEntD84uZpjejUZkbHQUBEP3X74LuH")! ,
+                to:SolanaPublicKey(base58String: "GNutLCXQEEcmxkJH5f5rw51bTW2QcLGXqitmN3EaVPoV")!,
+                lamports: BigUInt(5000)
+            ),
+            SolanaInstructionAssociatedAccount(
+                funding: SolanaPublicKey(base58String: "D37m1SKWnyY4fmhEntD84uZpjejUZkbHQUBEP3X74LuH")!,
+                wallet:  SolanaPublicKey(base58String: "4KxYRXTZ4PXXDCvaQeG75HLJFdKrwVY6bX5nckp8jpHh")!,
+                associatedToken: SolanaPublicKey(base58String: "CoPhcr5DrGZx6a3pbB2BmrTHjNAokZScQVUdyqCNWyRR")!,
+                mint: SolanaPublicKey(base58String: "GeDS162t9yGJuLEHPWXXGrb1zwkzinCgRwnT8vHYjKza")!
+            ),
+            SolanaInstructionAssetOwner(
+                destination: SolanaPublicKey(base58String: "D37m1SKWnyY4fmhEntD84uZpjejUZkbHQUBEP3X74LuH")!,
+                owner: .SYSTEM_PROGRAM_ID
+            )
+        ])
+        debugPrint(try BorshEncoder().encode(transaction).toHexString())
         
         // New
-        let newTransfer = SolanaProgramSystem.transfer(
-            from: SolanaPublicKey(base58String: "D37m1SKWnyY4fmhEntD84uZpjejUZkbHQUBEP3X74LuH")!,
-            to: SolanaPublicKey(base58String: "GNutLCXQEEcmxkJH5f5rw51bTW2QcLGXqitmN3EaVPoV")!,
-            lamports: 5000
-        )
-        let newAssociatedTokenAccount = SolanaProgramAssociatedTokenAccount.create(
-            funder: SolanaPublicKey(base58String: "D37m1SKWnyY4fmhEntD84uZpjejUZkbHQUBEP3X74LuH")!,
-            associatedToken: SolanaPublicKey(base58String: "CoPhcr5DrGZx6a3pbB2BmrTHjNAokZScQVUdyqCNWyRR")!,
-            owner: SolanaPublicKey(base58String: "4KxYRXTZ4PXXDCvaQeG75HLJFdKrwVY6bX5nckp8jpHh")!,
-            mint: SolanaPublicKey(base58String: "GeDS162t9yGJuLEHPWXXGrb1zwkzinCgRwnT8vHYjKza")!
-        )
-        let newMessage = try SolanaMessageLegacy([newTransfer, newAssociatedTokenAccount], blockhash: recentBlockhash)
-        let newTransaction = SolanaVersionedTransaction(message: newMessage)
-        
-        var newData = Data()
-        try newTransaction.serialize(to: &newData)
-        debugPrint(newData.toHexString())
+        let newMessage = try SolanaMessageLegacy([
+            SolanaProgramSystem.transfer(
+                from: SolanaPublicKey(base58String: "D37m1SKWnyY4fmhEntD84uZpjejUZkbHQUBEP3X74LuH")!,
+                to: SolanaPublicKey(base58String: "GNutLCXQEEcmxkJH5f5rw51bTW2QcLGXqitmN3EaVPoV")!,
+                lamports: 5000
+            ),
+            SolanaProgramAssociatedTokenAccount.create(
+                funder: SolanaPublicKey(base58String: "D37m1SKWnyY4fmhEntD84uZpjejUZkbHQUBEP3X74LuH")!,
+                associatedToken: SolanaPublicKey(base58String: "CoPhcr5DrGZx6a3pbB2BmrTHjNAokZScQVUdyqCNWyRR")!,
+                owner: SolanaPublicKey(base58String: "4KxYRXTZ4PXXDCvaQeG75HLJFdKrwVY6bX5nckp8jpHh")!,
+                mint: SolanaPublicKey(base58String: "GeDS162t9yGJuLEHPWXXGrb1zwkzinCgRwnT8vHYjKza")!
+            ),
+            SolanaProgramOwnerValidation.createOwnerValidation(
+                account: SolanaPublicKey(base58String: "D37m1SKWnyY4fmhEntD84uZpjejUZkbHQUBEP3X74LuH")!,
+                programId: .SYSTEM_PROGRAM_ID
+            )
+        ])
+        debugPrint(try BorshEncoder().encode(newMessage).toHexString())
     }
 }

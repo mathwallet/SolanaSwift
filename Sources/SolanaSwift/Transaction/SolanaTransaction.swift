@@ -49,6 +49,10 @@ public struct SolanaTransaction {
         self.instructions.append(instruction)
     }
     
+    public mutating func appendInstructions(instructions: [SolanaInstruction]) {
+        self.instructions.append(contentsOf: instructions)
+    }
+    
     public mutating func sign(keypair: SolanaKeyPair) throws -> SolanaSignedTransaction {
         try self.sign(keypair: keypair, otherPairs: [])
     }

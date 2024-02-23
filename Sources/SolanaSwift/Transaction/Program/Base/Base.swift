@@ -7,9 +7,6 @@
 
 import Foundation
 
-public protocol SolanaProgramBase {
-    associatedtype T: BorshCodable
-    var id: SolanaPublicKey { get }
-    var accounts: [SolanaSigner] { get }
-    var instruction: T { get }
+public protocol SolanaBaseProgram {
+    static var id: SolanaPublicKey { get }
 }
