@@ -76,6 +76,15 @@ public struct SolanaRPCProvider {
         }
     }
     
+    public func getTokenSupply(mint: String, successBlock:@escaping (_ tokenSupply: SolanaTokenSupply)-> Void,failure:@escaping (_ error:Error)-> Void) {
+        var params:[Any] = [mint]
+        self.sendJsonRpc(method: "getTokenSupply", resultType: SolanaTokenSupplyResult.self, parameters: params) { data in
+            successBlock(data.value)
+        } failure: { error in
+            failure(error)
+        }
+    }
+    
     public func getMainBalance(account:String,successBlock:@escaping (_ balanceValue:SolanaBlanceValue)-> Void,failure:@escaping (_ error:Error)-> Void) {
         let params = [account]
         self.sendJsonRpc(method: "getBalance", resultType: SolanaBlanceValue.self, parameters: params) { data in
