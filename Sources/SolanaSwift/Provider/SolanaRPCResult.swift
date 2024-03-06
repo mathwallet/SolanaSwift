@@ -52,6 +52,15 @@ public struct SolanaTokenAccountsByOwner:Codable {
     public var value:[SolanaTokenAccountsByOwnerValue]?
 }
 
+public struct SolanaTokenSupply: Codable {
+    public var amount: String
+    public var decimals: Int
+}
+
+public struct SolanaTokenSupplyResult: Codable {
+    public var value: SolanaTokenSupply
+}
+
 public struct SolanaNodeStatusResult: Codable {
     public var absoluteSlot:Int64?
     public var blockHeight:Int64?
