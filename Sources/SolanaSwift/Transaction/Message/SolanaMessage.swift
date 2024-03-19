@@ -31,7 +31,7 @@ public struct SolanaMessageLegacy: SolanaMessage {
     
     public var header: SolanaMessageHeader
     public var staticAccountKeys: [SolanaPublicKey]
-    public var recentBlockhash: SolanaBlockHash
+    public var recentBlockhash: SolanaBlockHash = .EMPTY
     public var compiledInstructions: [SolanaMessageCompiledInstruction]
     
     public func serialize(to writer: inout Data) throws {
@@ -48,7 +48,7 @@ public struct SolanaMessageLegacy: SolanaMessage {
         self.compiledInstructions = try .init(from: &reader)
     }
     
-    public init(_ instructions: [SolanaMessageInstruction], blockhash: SolanaBlockHash = .EMPTY, feePayer: SolanaPublicKey? = nil) throws {
+    public init(_ instructions: [SolanaMessageInstruction], feePayer: SolanaPublicKey? = nil) throws {
         // StaticAccountKeys
         var tempSigners = [SolanaSigner]()
         tempSigners.append(contentsOf: instructions.flatMap({ $0.accounts }))
@@ -80,8 +80,6 @@ public struct SolanaMessageLegacy: SolanaMessage {
         )
         // Accounts
         self.staticAccountKeys = signers.map({$0.publicKey})
-        // Recent Blockhash
-        self.recentBlockhash = blockhash
         // Compiled Instruction
         self.compiledInstructions = []
         for instruction in instructions {
