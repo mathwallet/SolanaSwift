@@ -58,7 +58,7 @@ public struct SolanaTokenSupply: Codable {
 }
 
 public struct SolanaTokenSupplyResult: Codable {
-    public var value:SolanaTokenSupply
+    public var value: SolanaTokenSupply
 }
 
 public struct SolanaNodeStatusResult: Codable {
