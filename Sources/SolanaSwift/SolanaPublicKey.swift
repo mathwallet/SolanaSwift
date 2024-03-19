@@ -15,9 +15,10 @@ public struct SolanaPublicKey {
     
     public static let SYSTEM_PROGRAM_ID = SolanaPublicKey(base58String: "11111111111111111111111111111111")!
     public static let TOKEN_PROGRAM_ID = SolanaPublicKey(base58String: "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA")!
-    public static let MEMO_PROGRAM_ID = SolanaPublicKey(base58String: "Memo1UhkJRfHyvLMcVucJwxXeuD728EqVDDwQDxFMNo")!
+    public static let MEMO_PROGRAM_ID = SolanaPublicKey(base58String: "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr")!
     public static let ASSOCIATED_TOKEN_PROGRAM_ID = SolanaPublicKey(base58String: "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL")!
     public static let SYSVAR_RENT_PUBKEY = SolanaPublicKey(base58String: "SysvarRent111111111111111111111111111111111")!
+    public static let SYSVAR_RECENT_BLOCK_HASHES_PUBKEY = SolanaPublicKey(base58String: "SysvarRecentB1ockHashes11111111111111111111")!
     public static let OWNER_VALIDATION_PROGRAM_ID = SolanaPublicKey(base58String: "4MNPdKu9wFMvEeZBMt3Eipfs5ovVWTJb31pEXDJAAxX5")!
     public static let MATEDATA_PUBLICKEY = SolanaPublicKey(base58String: "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s")!
     public static let COMPUTE_BUDGET_PROGRAM_ID = SolanaPublicKey(base58String: "ComputeBudget111111111111111111111111111111")!

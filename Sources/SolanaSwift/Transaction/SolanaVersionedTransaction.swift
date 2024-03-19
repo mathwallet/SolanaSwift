@@ -13,6 +13,10 @@ public struct SolanaVersionedTransaction {
     }
     public var message: SolanaMessage
     
+    public init(message: SolanaMessage) {
+        self.message = message
+    }
+    
     public mutating func sign(keypair: SolanaKeyPair) throws -> SolanaSignedVersionedTransaction {
         let digest = try BorshEncoder().encode(self.message)
         let signature = SolanaSignature.init(data: try keypair.signDigest(messageDigest: digest))

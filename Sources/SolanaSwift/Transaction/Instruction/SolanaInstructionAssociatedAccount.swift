@@ -26,9 +26,15 @@ public struct SolanaInstructionAssociatedAccount: SolanaInstructionBase {
 
 extension SolanaInstructionAssociatedAccount: BorshCodable {
     public func serialize(to writer: inout Data) throws {
+        // Instruction Type
+        try UInt8(0).serialize(to: &writer)
     }
     
     public init(from reader: inout BinaryReader) throws {
+        // Instruction Type
+        guard try UInt8.init(from: &reader) == 0 else {
+            throw BorshDecodingError.unknownData
+        }
         signers = []
     }
 }

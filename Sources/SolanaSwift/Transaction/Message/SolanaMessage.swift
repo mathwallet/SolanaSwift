@@ -31,7 +31,7 @@ public struct SolanaMessageLegacy: SolanaMessage {
     
     public var header: SolanaMessageHeader
     public var staticAccountKeys: [SolanaPublicKey]
-    public var recentBlockhash: SolanaBlockHash
+    public var recentBlockhash: SolanaBlockHash = .EMPTY
     public var compiledInstructions: [SolanaMessageCompiledInstruction]
     
     public func serialize(to writer: inout Data) throws {
@@ -46,6 +46,54 @@ public struct SolanaMessageLegacy: SolanaMessage {
         self.staticAccountKeys = try .init(from: &reader)
         self.recentBlockhash = try .init(from: &reader)
         self.compiledInstructions = try .init(from: &reader)
+    }
+    
+    public init(_ instructions: [SolanaMessageInstruction], feePayer: SolanaPublicKey? = nil) throws {
+        // StaticAccountKeys
+        var tempSigners = [SolanaSigner]()
+        tempSigners.append(contentsOf: instructions.flatMap({ $0.accounts }))
+        tempSigners.append(contentsOf: instructions.map({ SolanaSigner(publicKey: $0.programId) }))
+        // Deduplication
+        var signers = [SolanaSigner]()
+        for s in tempSigners {
+            if let i = signers.firstIndex(of: s){
+                signers[i].isSigner = signers[i].isSigner || s.isSigner
+                signers[i].isWritable = signers[i].isWritable || s.isWritable
+            } else {
+                signers.append(s)
+            }
+        }
+        // Sorted
+        signers = signers.sorted(by: <)
+        // Move fee payer to the front
+        if let payer = feePayer, let i = signers.map({ $0.publicKey }).firstIndex(of: payer), i > 0 {
+            signers.remove(at: i)
+            signers.insert(SolanaSigner(publicKey: payer, isSigner: true, isWritable: true), at: 0)
+        }
+        let publicKeys = signers.map({$0.publicKey})
+        
+        // Header
+        self.header = SolanaMessageHeader(
+            numRequiredSignatures: UInt8(signers.filter({ $0.isSigner }).count),
+            numReadonlySignedAccounts: UInt8(signers.filter({ $0.isSigner && !$0.isWritable }).count),
+            numReadonlyUnsignedAccounts: UInt8(signers.filter({ !$0.isSigner && !$0.isWritable }).count)
+        )
+        // Accounts
+        self.staticAccountKeys = signers.map({$0.publicKey})
+        // Compiled Instruction
+        self.compiledInstructions = []
+        for instruction in instructions {
+            let programIdIndex = UInt8(publicKeys.firstIndex(of: instruction.programId)!)
+            let accountKeyIndexes = instruction.accounts.map({ UInt8(publicKeys.firstIndex(of: $0.publicKey)!) })
+            let data = try BorshEncoder().encode(instruction.data)
+            
+            let compiledInstruction = SolanaMessageCompiledInstruction(
+                programIdIndex: programIdIndex,
+                accountKeyIndexes: accountKeyIndexes,
+                data: data
+            )
+            self.compiledInstructions.append(compiledInstruction)
+        }
     }
 }
 
