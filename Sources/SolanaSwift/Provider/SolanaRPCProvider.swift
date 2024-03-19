@@ -77,7 +77,7 @@ public struct SolanaRPCProvider {
     }
     
     public func getTokenSupply(mint: String, successBlock:@escaping (_ tokenSupply: SolanaTokenSupply)-> Void,failure:@escaping (_ error:Error)-> Void) {
-        let params:[Any] = [mint]
+        let params: [Any] = [mint]
         self.sendJsonRpc(method: "getTokenSupply", resultType: SolanaTokenSupplyResult.self, parameters: params) { data in
             successBlock(data.value)
         } failure: { error in
