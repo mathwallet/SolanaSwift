@@ -149,7 +149,7 @@ extension SolanaRPCProvider {
         self.getTokenAccountsByOwner(account: owner, programId: programId) { tokenAccounts in
             var tokenArray:[SolanaNFTTokenResult] = [SolanaNFTTokenResult]()
             for value in tokenAccounts.value! {
-                let amount = Int(value.account!.data!.parsed!.info!.tokenAmount!.amount!)!
+                let amount = Int(value.account?.data?.parsed?.info?.tokenAmount?.uiAmount ?? 0)
                 let decimals = value.account!.data!.parsed!.info!.tokenAmount!.decimals!
                 if amount > 0 && decimals == 0 {
                     guard let mint = SolanaPublicKey(base58String:value.account!.data!.parsed!.info!.mint!),let FDAAdddress = SolanaPublicKey.createProgramAddress(mint:mint) else {
