@@ -151,7 +151,7 @@ extension SolanaRPCProvider {
             for value in tokenAccounts.value! {
                 let amount = Int(value.account?.data?.parsed?.info?.tokenAmount?.amount ?? "0" ) ?? 0
                 let decimals = value.account!.data!.parsed!.info!.tokenAmount!.decimals!
-                if amount > 0 && amount < 1000 && decimals == 0 {
+                if amount > 0 && amount < 100000 && decimals == 0 {
                     guard let mint = SolanaPublicKey(base58String:value.account!.data!.parsed!.info!.mint!),let FDAAdddress = SolanaPublicKey.createProgramAddress(mint:mint) else {
                         failure(SolanaRpcProviderError.unknown)
                         return
@@ -218,7 +218,7 @@ extension SolanaRPCProvider {
                             group.leave()
                         }
                     } failure: { error in
-                        failure(error)
+//                        failure(error)
                         group.leave()
                     }
                 }
