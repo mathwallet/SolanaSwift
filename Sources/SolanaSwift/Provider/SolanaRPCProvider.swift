@@ -214,7 +214,7 @@ extension SolanaRPCProvider {
                             }
                             group.leave()
                         } failure: { error in
-                            failure(error)
+//                            failure(error)
                             group.leave()
                         }
                     } failure: { error in
