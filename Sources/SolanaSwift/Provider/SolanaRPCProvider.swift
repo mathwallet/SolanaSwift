@@ -156,10 +156,8 @@ extension SolanaRPCProvider {
                         failure(SolanaRpcProviderError.unknown)
                         return
                     }
-                    self.getAccountInfo(pubkey:  FDAAdddress.address, encoding: "base64") { accountInfo in
-                        let result = SolanaNFTTokenResult(pubkey: value.pubkey!, mint: value.account!.data!.parsed!.info!.mint!, owner: value.account!.data!.parsed!.info!.owner!, FDAAddress: FDAAdddress.address,amount: amount)
-                        tokenArray.append(result)
-                    } failure: { _ in}
+                    let result = SolanaNFTTokenResult(pubkey: value.pubkey!, mint: value.account!.data!.parsed!.info!.mint!, owner: value.account!.data!.parsed!.info!.owner!, FDAAddress: FDAAdddress.address,amount: amount)
+                    tokenArray.append(result)
                 }
             }
             successBlock(tokenArray)
