@@ -157,7 +157,7 @@ extension SolanaRPCProvider {
                 for value in tokenAccounts.value! {
                     let amount = Int(value.account?.data?.parsed?.info?.tokenAmount?.amount ?? "0" ) ?? 0
                     let decimals = value.account!.data!.parsed!.info!.tokenAmount!.decimals!
-                    if decimals == 0 && !tokenMintArray.contains(value.account?.data?.parsed?.info?.mint ?? "")  {
+                    if decimals == 0 && !tokenMintArray.contains(value.pubkey ?? "")  {
                         guard let mint = SolanaPublicKey(base58String:value.account!.data!.parsed!.info!.mint!),let FDAAdddress = SolanaPublicKey.createProgramAddress(mint:mint) else {
                             failure(SolanaRpcProviderError.unknown)
                             return
@@ -174,27 +174,6 @@ extension SolanaRPCProvider {
             failure(error)
         }
     }
-    
-//    public func getNFTTokensByOwner(owner:String,programId:String,successBlock:@escaping (_ nftTokens:[SolanaNFTTokenResult])-> Void,failure:@escaping (_ error:Error)-> Void) {
-//        self.getTokenAccountsByOwner(account: owner, programId: programId) { tokenAccounts in
-//            var tokenArray:[SolanaNFTTokenResult] = [SolanaNFTTokenResult]()
-//            for value in tokenAccounts.value! {
-//                let amount = Int(value.account?.data?.parsed?.info?.tokenAmount?.amount ?? "0" ) ?? 0
-//                let decimals = value.account!.data!.parsed!.info!.tokenAmount!.decimals!
-//                if amount > 0 && amount < 100000 && decimals == 0 {
-//                    guard let mint = SolanaPublicKey(base58String:value.account!.data!.parsed!.info!.mint!),let FDAAdddress = SolanaPublicKey.createProgramAddress(mint:mint) else {
-//                        failure(SolanaRpcProviderError.unknown)
-//                        return
-//                    }
-//                    let result = SolanaNFTTokenResult(pubkey: value.pubkey!, mint: value.account!.data!.parsed!.info!.mint!, owner: value.account!.data!.parsed!.info!.owner!, FDAAddress: FDAAdddress.address,amount: amount)
-//                    tokenArray.append(result)
-//                }
-//            }
-//            successBlock(tokenArray)
-//        } failure: { error in
-//            failure(error)
-//        }
-//    }
         
     public func getMetaData(token:SolanaNFTTokenResult,successBlock:@escaping (_ metaData:MetaPlexMeta)->Void,failure:@escaping (_ error:Error)-> Void) {
         self.getAccountInfo(pubkey: token.FDAAddress, encoding: "base64") { accountInfo in
