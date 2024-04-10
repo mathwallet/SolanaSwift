@@ -239,9 +239,9 @@ extension SolanaRPCProvider {
                 queue.async {
                     self.getMetaData(token: nftToken) { metaData in
                         self.getNft(uri: metaData.data.uri) { nftResult in
-//                            for _ in 0..<nftToken.amount {
+                            for _ in 0..<nftToken.amount {
                                 nfts.append(SolanaNFTResult(_id: nftResult._id, image: nftResult.image, description: nftResult.description, name: nftResult.name, mint: nftToken.mint, symbol: nftResult.symbol))
-//                            }
+                            }
                             group.leave()
                         } failure: { error in
 //                            failure(error)
@@ -276,7 +276,7 @@ extension SolanaRPCProvider {
             case .success(let data):
                 do {
                     let result = try JSONDecoder().decode(SolanaTokenFilterResult.self, from: data)
-                    let removeResult = result.collectibles?.filter{ $0.chainData?.standard ?? "" == "SemiFungible" && $0.collection?.isSpam ?? true == true }
+                    let removeResult = result.collectibles?.filter{ $0.chainData?.standard ?? "" != "NonFungible" && $0.collection?.isSpam ?? true == true }
                     successBlock(removeResult!)
                 } catch let e {
                     failure(e)
