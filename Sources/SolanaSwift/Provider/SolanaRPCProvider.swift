@@ -151,7 +151,7 @@ extension SolanaRPCProvider {
             self.filterTokenArray(owner: owner) { removeResult in
                 var tokenMintArray: [String] = [String]()
                 removeResult.forEach { collectibleResult in
-                    tokenMintArray.append(collectibleResult.chainData?.mint ?? "")
+                    tokenMintArray.append(collectibleResult.chainData?.tokenAccount ?? "")
                 }
                 var tokenArray:[SolanaNFTTokenResult] = [SolanaNFTTokenResult]()
                 for value in tokenAccounts.value! {
