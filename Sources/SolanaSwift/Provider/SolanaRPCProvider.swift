@@ -167,8 +167,6 @@ extension SolanaRPCProvider {
                     }
                 }
                 successBlock(tokenArray)
-            } failure: { error in
-                failure(error)
             }
         } failure: { error in
             failure(error)
@@ -240,23 +238,28 @@ extension SolanaRPCProvider {
         }, failure: failure)
     }
     
-    public func filterTokenArray(url: String = "https://a5.maiziqianbao.net/api/v1/collectibles/phantom_collectibles_v1", owner: String, successBlock: @escaping(_ removeResult: [SolanaTokenCollectibleResult]) -> Void, failure: @escaping (_ error:Error) -> Void) {
+    public func filterTokenArray(url: String = "https://a5.maiziqianbao.net/api/v1/collectibles/phantom_collectibles_v1", owner: String, successBlock: @escaping(_ removeResult: [SolanaTokenCollectibleResult]) -> Void) {
         AF.request("\(url)/\(owner)", encoding: JSONEncoding.default, headers: nil).responseData { response in
+            var removeCollections = [SolanaTokenCollectibleResult]()
             switch response.result {
             case .success(let data):
                 do {
                     let result = try JSONDecoder().decode(SolanaTokenFilterResult.self, from: data)
-                    guard let collectibles = result.data?.collectibles else {
-                        failure(SolanaRpcProviderError.unknown)
-                        return
+                    if let collectibles = result.data?.collectibles {
+                        collectibles.forEach { collectible in
+                            if let standard = collectible.chainData?.standard,
+                               let isSpam = collectible.collection?.isSpam,
+                               standard != "NonFungible" && isSpam == true  {
+                                removeCollections.append(collectible)
+                            }
+                        }
                     }
-                    let removeResult = collectibles.filter{ $0.chainData?.standard ?? "" != "NonFungible" && $0.collection?.isSpam ?? true == true }
-                    successBlock(removeResult)
+                    successBlock(removeCollections)
                 } catch let e {
-                    failure(e)
+                    successBlock(removeCollections)
                 }
             case let .failure(e):
-                failure(e)
+                successBlock(removeCollections)
             }
         }
     }
