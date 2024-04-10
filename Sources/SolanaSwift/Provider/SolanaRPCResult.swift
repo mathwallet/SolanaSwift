@@ -124,6 +124,12 @@ public struct SolanaNFTResult: Codable {
 }
 
 public struct SolanaTokenFilterResult: Codable {
+    public var data: SolanaTokenFilterDataResult?
+    public var message: String?
+    public var code: Int?
+}
+
+public struct SolanaTokenFilterDataResult: Codable {
     public var collectibles: [SolanaTokenCollectibleResult]?
     public var isTrimmed: Bool?
 }

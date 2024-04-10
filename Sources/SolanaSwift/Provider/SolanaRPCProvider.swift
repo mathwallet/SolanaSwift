@@ -146,9 +146,9 @@ public struct SolanaRPCProvider {
 
 extension SolanaRPCProvider {
     
-    public func getNFTTokensByOwner(owner:String,programId:String,successBlock:@escaping (_ nftTokens:[SolanaNFTTokenResult])-> Void,failure:@escaping (_ error:Error)-> Void) {
+    public func getNFTTokensByOwner(owner:String,programId: String,filterUrl: String, successBlock:@escaping (_ nftTokens:[SolanaNFTTokenResult])-> Void,failure:@escaping (_ error:Error)-> Void) {
         self.getTokenAccountsByOwner(account: owner, programId: programId) { tokenAccounts in
-            self.filterTokenArray(owner: owner) { removeResult in
+            self.filterTokenArray(url: filterUrl, owner: owner) { removeResult in
                 var tokenMintArray: [String] = [String]()
                 removeResult.forEach { collectibleResult in
                     tokenMintArray.append(collectibleResult.chainData?.tokenAccount ?? "")
@@ -229,9 +229,9 @@ extension SolanaRPCProvider {
         }
     }
     
-    public func getNfts(owner:String,successBlock:@escaping (_ nftTokens:[SolanaNFTTokenResult],_ nfts:[SolanaNFTResult])-> Void,failure:@escaping (_ error:Error)-> Void) {
+    public func getNfts(owner:String, filterUrl: String, successBlock:@escaping (_ nftTokens:[SolanaNFTTokenResult],_ nfts:[SolanaNFTResult])-> Void,failure:@escaping (_ error:Error)-> Void) {
         var nfts:[SolanaNFTResult] = [SolanaNFTResult]()
-        self.getNFTTokensByOwner(owner: owner, programId: SolanaPublicKey.TOKEN_PROGRAM_ID.address, successBlock: { nftTokens in
+        self.getNFTTokensByOwner(owner: owner, programId: SolanaPublicKey.TOKEN_PROGRAM_ID.address, filterUrl: filterUrl, successBlock: { nftTokens in
             let queue = DispatchQueue(label: "solana", attributes: .concurrent)
             let group = DispatchGroup()
             nftTokens.forEach { nftToken in
@@ -261,23 +261,18 @@ extension SolanaRPCProvider {
         }, failure: failure)
     }
     
-    public func filterTokenArray(url: String = "https://api.phantom.app/collectibles/v1", owner: String, successBlock: @escaping(_ removeResult: [SolanaTokenCollectibleResult]) -> Void, failure: @escaping (_ error:Error) -> Void) {
-        let p:Parameters = ["addresses":
-                                [
-                                    [
-                                        "chainId": "solana:101",
-                                        "address": owner
-                                        
-                                    ]
-                                ]
-        ]
-        AF.request(url, method: .post, parameters: p, encoding: JSONEncoding.default, headers: nil).responseData { response in
+    public func filterTokenArray(url: String = "https://a5.maiziqianbao.net/api/v1/collectibles/phantom_collectibles_v1", owner: String, successBlock: @escaping(_ removeResult: [SolanaTokenCollectibleResult]) -> Void, failure: @escaping (_ error:Error) -> Void) {
+        AF.request("\(url)/\(owner)", encoding: JSONEncoding.default, headers: nil).responseData { response in
             switch response.result {
             case .success(let data):
                 do {
                     let result = try JSONDecoder().decode(SolanaTokenFilterResult.self, from: data)
-                    let removeResult = result.collectibles?.filter{ $0.chainData?.standard ?? "" != "NonFungible" && $0.collection?.isSpam ?? true == true }
-                    successBlock(removeResult!)
+                    guard let collectibles = result.data?.collectibles else {
+                        failure(SolanaRpcProviderError.unknown)
+                        return
+                    }
+                    let removeResult = collectibles.filter{ $0.chainData?.standard ?? "" != "NonFungible" && $0.collection?.isSpam ?? true == true }
+                    successBlock(removeResult)
                 } catch let e {
                     failure(e)
                 }

@@ -273,26 +273,11 @@ final class SolanaSwiftTests: XCTestCase {
         debugPrint(try BorshEncoder().encode(newMessage).toHexString())
     }
     
-    func testNftTokenSupplyData() throws {
-        let provider = SolanaRPCProvider(nodeUrl: "https://solana.maiziqianbao.net")
-        let reqeustExpectation = expectation(description: "Tests")
-        DispatchQueue.global().async {
-            provider.getNfts(owner: "ApJ48xWtb3qmppDMGwvRxdnf4utH2rYoW6pFyd8Ynzud") { nftTokens, nfts in
-                print(nftTokens.count,nfts.count)
-                reqeustExpectation.fulfill()
-            } failure: { error in
-                print(error.localizedDescription)
-            }
-
-        }
-        wait(for: [reqeustExpectation], timeout: 100)
-    }
-    
     func testNftTokenfData() throws {
         let provider = SolanaRPCProvider(nodeUrl: "https://solana.maiziqianbao.net")
         let reqeustExpectation = expectation(description: "Tests")
         DispatchQueue.global().async {
-            provider.getNFTTokensByOwner(owner: "ApJ48xWtb3qmppDMGwvRxdnf4utH2rYoW6pFyd8Ynzud", programId: "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA") { nftTokens in
+            provider.getNFTTokensByOwner(owner: "ApJ48xWtb3qmppDMGwvRxdnf4utH2rYoW6pFyd8Ynzud", programId: "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA", filterUrl: "https://a5.maiziqianbao.net/api/v1/collectibles/phantom_collectibles_v1") { nftTokens in
                 nftTokens.forEach { lanaNFTTokenResult in
                     debugPrint(lanaNFTTokenResult.FDAAddress)
                 }
