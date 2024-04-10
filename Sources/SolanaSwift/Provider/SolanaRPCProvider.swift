@@ -157,7 +157,7 @@ extension SolanaRPCProvider {
                 for value in tokenAccounts.value! {
                     let amount = Int(value.account?.data?.parsed?.info?.tokenAmount?.amount ?? "0" ) ?? 0
                     let decimals = value.account!.data!.parsed!.info!.tokenAmount!.decimals!
-                    if decimals == 0 && !tokenMintArray.contains(value.pubkey ?? "")  {
+                    if decimals == 0 && tokenMintArray.contains(value.pubkey ?? "")  {
                         guard let mint = SolanaPublicKey(base58String:value.account!.data!.parsed!.info!.mint!),let FDAAdddress = SolanaPublicKey.createProgramAddress(mint:mint) else {
                             failure(SolanaRpcProviderError.unknown)
                             return
@@ -240,7 +240,7 @@ extension SolanaRPCProvider {
     
     public func filterTokenArray(url: String = "https://a5.maiziqianbao.net/api/v1/collectibles/phantom_collectibles_v1", owner: String, successBlock: @escaping(_ removeResult: [SolanaTokenCollectibleResult]) -> Void) {
         AF.request("\(url)/\(owner)", encoding: JSONEncoding.default, headers: nil).responseData { response in
-            var removeCollections = [SolanaTokenCollectibleResult]()
+            var collections = [SolanaTokenCollectibleResult]()
             switch response.result {
             case .success(let data):
                 do {
@@ -249,17 +249,17 @@ extension SolanaRPCProvider {
                         collectibles.forEach { collectible in
                             if let standard = collectible.chainData?.standard,
                                let isSpam = collectible.collection?.isSpam,
-                               standard != "NonFungible" && isSpam == true  {
-                                removeCollections.append(collectible)
+                               standard == "NonFungible" && isSpam == false  {
+                                collections.append(collectible)
                             }
                         }
                     }
-                    successBlock(removeCollections)
-                } catch let e {
-                    successBlock(removeCollections)
+                    successBlock(collections)
+                } catch _ {
+                    successBlock(collections)
                 }
-            case let .failure(e):
-                successBlock(removeCollections)
+            case .failure(_):
+                successBlock(collections)
             }
         }
     }
