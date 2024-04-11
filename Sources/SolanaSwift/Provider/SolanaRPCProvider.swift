@@ -145,22 +145,29 @@ public struct SolanaRPCProvider {
 }
 
 extension SolanaRPCProvider {
-    public func getNFTTokensByOwner(owner:String,programId:String,successBlock:@escaping (_ nftTokens:[SolanaNFTTokenResult])-> Void,failure:@escaping (_ error:Error)-> Void) {
+    
+    public func getNFTTokensByOwner(owner:String,programId: String,filterUrl: String, successBlock:@escaping (_ nftTokens:[SolanaNFTTokenResult])-> Void,failure:@escaping (_ error:Error)-> Void) {
         self.getTokenAccountsByOwner(account: owner, programId: programId) { tokenAccounts in
-            var tokenArray:[SolanaNFTTokenResult] = [SolanaNFTTokenResult]()
-            for value in tokenAccounts.value! {
-                let amount = Int(value.account?.data?.parsed?.info?.tokenAmount?.amount ?? "0" ) ?? 0
-                let decimals = value.account!.data!.parsed!.info!.tokenAmount!.decimals!
-                if amount > 0 && amount < 100000 && decimals == 0 {
-                    guard let mint = SolanaPublicKey(base58String:value.account!.data!.parsed!.info!.mint!),let FDAAdddress = SolanaPublicKey.createProgramAddress(mint:mint) else {
-                        failure(SolanaRpcProviderError.unknown)
-                        return
-                    }
-                    let result = SolanaNFTTokenResult(pubkey: value.pubkey!, mint: value.account!.data!.parsed!.info!.mint!, owner: value.account!.data!.parsed!.info!.owner!, FDAAddress: FDAAdddress.address,amount: amount)
-                    tokenArray.append(result)
+            self.filterTokenArray(url: filterUrl, owner: owner) { legitimateResult in
+                var tokenMintArray: [String] = [String]()
+                legitimateResult.forEach { collectibleResult in
+                    tokenMintArray.append(collectibleResult.chainData?.tokenAccount ?? "")
                 }
+                var tokenArray:[SolanaNFTTokenResult] = [SolanaNFTTokenResult]()
+                for value in tokenAccounts.value! {
+                    let amount = Int(value.account?.data?.parsed?.info?.tokenAmount?.amount ?? "0" ) ?? 0
+                    let decimals = value.account!.data!.parsed!.info!.tokenAmount!.decimals!
+                    if decimals == 0 && tokenMintArray.contains(value.pubkey ?? "")  {
+                        guard let mint = SolanaPublicKey(base58String:value.account!.data!.parsed!.info!.mint!),let FDAAdddress = SolanaPublicKey.createProgramAddress(mint:mint) else {
+                            failure(SolanaRpcProviderError.unknown)
+                            return
+                        }
+                        let result = SolanaNFTTokenResult(pubkey: value.pubkey!, mint: value.account!.data!.parsed!.info!.mint!, owner: value.account!.data!.parsed!.info!.owner!, FDAAddress: FDAAdddress.address,amount: amount)
+                        tokenArray.append(result)
+                    }
+                }
+                successBlock(tokenArray)
             }
-            successBlock(tokenArray)
         } failure: { error in
             failure(error)
         }
@@ -199,9 +206,9 @@ extension SolanaRPCProvider {
         }
     }
     
-    public func getNfts(owner:String,successBlock:@escaping (_ nftTokens:[SolanaNFTTokenResult],_ nfts:[SolanaNFTResult])-> Void,failure:@escaping (_ error:Error)-> Void) {
+    public func getNfts(owner:String, filterUrl: String, successBlock:@escaping (_ nftTokens:[SolanaNFTTokenResult],_ nfts:[SolanaNFTResult])-> Void,failure:@escaping (_ error:Error)-> Void) {
         var nfts:[SolanaNFTResult] = [SolanaNFTResult]()
-        self.getNFTTokensByOwner(owner: owner, programId: SolanaPublicKey.TOKEN_PROGRAM_ID.address, successBlock: { nftTokens in
+        self.getNFTTokensByOwner(owner: owner, programId: SolanaPublicKey.TOKEN_PROGRAM_ID.address, filterUrl: filterUrl, successBlock: { nftTokens in
             let queue = DispatchQueue(label: "solana", attributes: .concurrent)
             let group = DispatchGroup()
             nftTokens.forEach { nftToken in
@@ -214,11 +221,11 @@ extension SolanaRPCProvider {
                             }
                             group.leave()
                         } failure: { error in
-//                            failure(error)
+                            failure(error)
                             group.leave()
                         }
                     } failure: { error in
-//                        failure(error)
+                        failure(error)
                         group.leave()
                     }
                 }
@@ -229,6 +236,32 @@ extension SolanaRPCProvider {
                 }
             }))
         }, failure: failure)
+    }
+    
+    public func filterTokenArray(url: String = "https://a5.maiziqianbao.net/api/v1/collectibles/phantom_collectibles_v1", owner: String, successBlock: @escaping(_ legitimateResult: [SolanaTokenCollectibleResult]) -> Void) {
+        AF.request("\(url)/\(owner)", encoding: JSONEncoding.default, headers: nil).responseData { response in
+            var collections = [SolanaTokenCollectibleResult]()
+            switch response.result {
+            case .success(let data):
+                do {
+                    let result = try JSONDecoder().decode(SolanaTokenFilterResult.self, from: data)
+                    if let collectibles = result.data?.collectibles {
+                        collectibles.forEach { collectible in
+                            if let standard = collectible.chainData?.standard,
+                               let isSpam = collectible.collection?.isSpam,
+                               standard == "NonFungible" && isSpam == false  {
+                                collections.append(collectible)
+                            }
+                        }
+                    }
+                    successBlock(collections)
+                } catch _ {
+                    successBlock(collections)
+                }
+            case .failure(_):
+                successBlock(collections)
+            }
+        }
     }
 }
 

@@ -6,7 +6,7 @@
 //
 
 import Foundation
-
+import AnyCodable
 
 public struct SolanaSolanaTokenAccountTokenAmount:Codable {
     public var amount:String?
@@ -114,11 +114,60 @@ public struct SolanaNFTTokenResult {
     public var amount:Int
 }
 
-public struct SolanaNFTResult:Codable {
+public struct SolanaNFTResult: Codable {
     public var _id:String?
     public var image:String?
     public var description:String?
     public var name:String?
     public var mint:String?
     public var symbol:String?
+}
+
+public struct SolanaTokenFilterResult: Codable {
+    public var data: SolanaTokenFilterDataResult?
+    public var message: String?
+    public var code: Int?
+}
+
+public struct SolanaTokenFilterDataResult: Codable {
+    public var collectibles: [SolanaTokenCollectibleResult]?
+    public var isTrimmed: Bool?
+}
+
+public struct SolanaTokenCollectibleResult: Codable {
+    public var id: String?
+    public var chain: AnyCodable?
+    public var name: String?
+    public var symbol: String?
+    public var collection: SolanaTokenCollectionResult?
+    public var media: AnyCodable?
+    public var attributes: [AnyCodable]?
+    public var balance: String?
+    public var decimals: String?
+    public var owner: String?
+    public var chainData: SolanaTokenChainDataResult?
+    public var tokenCount: Int?
+}
+
+public struct SolanaTokenCollectionResult: Codable {
+    public var id: String?
+    public var isValidCollectionId: Bool?
+    public var imageUrl: String?
+    public var isSpam: Bool?
+    public var spamStatus: String?
+    public var ownerCount: Int?
+    public var totalCount: Int?
+    public var tokenCount: Int?
+    public var marketplaces: [AnyCodable]?
+}
+
+public struct SolanaTokenChainDataResult: Codable {
+    public var balance: String?
+    public var decimals: String?
+    public var mint: String?
+    public var tokenAccount: String?
+    public var standard: String?
+    public var isFrozen: Bool?
+    public var programId: String?
+    public var mintExtensions: [AnyCodable]?
 }
