@@ -148,9 +148,9 @@ extension SolanaRPCProvider {
     
     public func getNFTTokensByOwner(owner:String,programId: String,filterUrl: String, successBlock:@escaping (_ nftTokens:[SolanaNFTTokenResult])-> Void,failure:@escaping (_ error:Error)-> Void) {
         self.getTokenAccountsByOwner(account: owner, programId: programId) { tokenAccounts in
-            self.filterTokenArray(url: filterUrl, owner: owner) { removeResult in
+            self.filterTokenArray(url: filterUrl, owner: owner) { legitimateResult in
                 var tokenMintArray: [String] = [String]()
-                removeResult.forEach { collectibleResult in
+                legitimateResult.forEach { collectibleResult in
                     tokenMintArray.append(collectibleResult.chainData?.tokenAccount ?? "")
                 }
                 var tokenArray:[SolanaNFTTokenResult] = [SolanaNFTTokenResult]()
@@ -221,11 +221,11 @@ extension SolanaRPCProvider {
                             }
                             group.leave()
                         } failure: { error in
-//                            failure(error)
+                            failure(error)
                             group.leave()
                         }
                     } failure: { error in
-//                        failure(error)
+                        failure(error)
                         group.leave()
                     }
                 }
@@ -238,7 +238,7 @@ extension SolanaRPCProvider {
         }, failure: failure)
     }
     
-    public func filterTokenArray(url: String = "https://a5.maiziqianbao.net/api/v1/collectibles/phantom_collectibles_v1", owner: String, successBlock: @escaping(_ removeResult: [SolanaTokenCollectibleResult]) -> Void) {
+    public func filterTokenArray(url: String = "https://a5.maiziqianbao.net/api/v1/collectibles/phantom_collectibles_v1", owner: String, successBlock: @escaping(_ legitimateResult: [SolanaTokenCollectibleResult]) -> Void) {
         AF.request("\(url)/\(owner)", encoding: JSONEncoding.default, headers: nil).responseData { response in
             var collections = [SolanaTokenCollectibleResult]()
             switch response.result {
