@@ -210,7 +210,7 @@ extension SolanaRPCProvider {
         }
     }
     
-    func getNFT(uri: String) async throws -> SolanaNFTResult {
+    public func getNFT(uri: String) async throws -> SolanaNFTResult {
         let response = await AF.request(
             uri,
             method: .get,
@@ -226,7 +226,7 @@ extension SolanaRPCProvider {
         }
     }
     
-    func getNFTs(owner: SolanaPublicKey, filterUrl: String) async throws -> ([SolanaNFTTokenResult],[SolanaNFTResult]) {
+    public func getNFTs(owner: SolanaPublicKey, filterUrl: String) async throws -> ([SolanaNFTTokenResult],[SolanaNFTResult]) {
         let nftTokens = try await self.getNFTTokensByOwner(owner: owner, programId: SolanaPublicKey.TOKEN_PROGRAM_ID, filterUrl: filterUrl)
         let results = await withThrowingTaskGroup(of: [SolanaNFTResult].self) { group in
             for nftToken in nftTokens {
