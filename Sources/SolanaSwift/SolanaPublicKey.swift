@@ -24,7 +24,7 @@ public struct SolanaPublicKey {
     public static let COMPUTE_BUDGET_PROGRAM_ID = SolanaPublicKey(base58String: "ComputeBudget111111111111111111111111111111")!
     
     public let data: Data
-    public var address:String {
+    public var address: String {
         return self.data.bytes.base58EncodedString
     }
     
@@ -37,7 +37,7 @@ public struct SolanaPublicKey {
         guard data.count == Self.Size else {
             return nil
         }
-        self.init(data: Data(data))
+        self.init(data: data)
     }
 }
 
@@ -51,6 +51,24 @@ extension SolanaPublicKey {
             return false
         }
         return true
+    }
+}
+
+extension SolanaPublicKey: Codable {
+    public func encode(to encoder: any Encoder) throws {
+        var signleValuedCont = encoder.singleValueContainer()
+        try signleValuedCont.encode(self.address)
+    }
+    
+    public init(from decoder: any Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        let base58String = try container.decode(String.self)
+        
+        let data = base58String.base58DecodedData
+        guard data.count == Self.Size else {
+            throw DecodingError.dataCorruptedError(in: container, debugDescription: "Invalid PublicKey")
+        }
+        self.init(data: data)
     }
 }
 
@@ -68,7 +86,7 @@ extension SolanaPublicKey: CustomStringConvertible {
     }
 }
 
-extension SolanaPublicKey:BorshCodable {
+extension SolanaPublicKey: BorshCodable {
     public func serialize(to writer: inout Data) throws {
         writer.append(self.data)
     }
