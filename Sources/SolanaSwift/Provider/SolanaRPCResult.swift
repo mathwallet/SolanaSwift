@@ -93,7 +93,7 @@ public struct SolanaRPCAccountInfo: Decodable {
 }
 
 public struct SolanaRPCAccountInfoResult: Decodable {
-    public var value: SolanaRPCAccountInfo
+    public var value: SolanaRPCAccountInfo?
 }
 
 public struct SolanaRPCTokenAccountTokenAmount: Decodable {
