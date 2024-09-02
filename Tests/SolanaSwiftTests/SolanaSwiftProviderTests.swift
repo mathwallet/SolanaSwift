@@ -21,7 +21,7 @@ final class SolanaSwiftProviderTests: XCTestCase {
     func testGetTokenAccountInfoExamples() async throws {
         let owner = SolanaPublicKey(base58String: "GNutLCXQEEcmxkJH5f5rw51bTW2QcLGXqitmN3EaVPoV")!
         let accountInfo = try await provider.getAccountInfo(account: owner, opts: [.encoding(.base58)])
-        debugPrint("getAccountInfo", accountInfo)
+        debugPrint("getAccountInfo", accountInfo ?? "accountInfo nil")
     }
     
     func testGetTokenAccountsByOwnerExamples() async throws {

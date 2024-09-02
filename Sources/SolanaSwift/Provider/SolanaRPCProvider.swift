@@ -202,7 +202,7 @@ extension SolanaRPCProvider {
     
     public func getMetaData(token: SolanaNFTTokenResult) async throws -> MetaPlexMeta {
         let accountInfo = try await self.getAccountInfo(account: token.FDAAddress, opts: [.encoding(.base64)])
-        if let datas = accountInfo.data.value as? [Any], let base64data = datas.first as? String, let data = Data(base64Encoded: base64data) {
+        if let _accountInfo = accountInfo, let datas = _accountInfo.data.value as? [Any], let base64data = datas.first as? String, let data = Data(base64Encoded: base64data) {
             let metaData = try BorshDecoder.decode(MetaPlexMeta.self, from: data)
             return metaData
         } else {
