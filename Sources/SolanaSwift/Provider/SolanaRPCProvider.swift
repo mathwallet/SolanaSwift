@@ -233,7 +233,7 @@ extension SolanaRPCProvider {
                 group.addTask {
                     let metaData = try await self.getMetaData(token: nftToken)
                     let nft = try await self.getNFT(uri: metaData.data.uri)
-                    return Array(repeating: SolanaNFTResult(_id: nft._id, image: nft.image, description: nft.description, name: nft.name, mint: nft.mint, symbol: nft.symbol), count: nftToken.amount)
+                    return Array(repeating: SolanaNFTResult(_id: nft._id, image: nft.image, description: nft.description, name: nft.name, mint: nftToken.mint.address, symbol: nft.symbol), count: nftToken.amount)
                 }
             }
             var results = [SolanaNFTResult]()
