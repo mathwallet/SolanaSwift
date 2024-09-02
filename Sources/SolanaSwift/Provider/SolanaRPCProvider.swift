@@ -114,7 +114,7 @@ public class SolanaRPCProvider {
     public func getAccountInfo(
         account: SolanaPublicKey,
         opts: [SolanaRPCOptional] = [.encoding(.base58)]
-    ) async throws -> SolanaRPCAccountInfo {
+    ) async throws -> SolanaRPCAccountInfo? {
         var parameters: [Any] = [account.address]
         if let optsParameters = SolanaRPCOptional.getParameters(opts) {
             parameters.append(optsParameters)
