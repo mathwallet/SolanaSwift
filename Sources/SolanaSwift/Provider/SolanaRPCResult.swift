@@ -20,6 +20,15 @@ public enum SolanaRpcProviderError: LocalizedError {
             return "Unknown error"
         }
     }
+    
+    public var localizedDescription: String {
+        switch self {
+        case .server(let message):
+            return message
+        default:
+            return "Unknown error"
+        }
+    }
 }
 
 public struct SolanaRpcResult<T: Decodable>: Decodable {
