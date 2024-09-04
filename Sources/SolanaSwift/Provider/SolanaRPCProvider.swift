@@ -40,8 +40,10 @@ public class SolanaRPCProvider {
         case .success(let r):
             if let result = response.result as? T {
                 return result
+            } else if let error = r.error {
+                throw SolanaRpcProviderError.server(message: error.message)
             } else {
-                throw SolanaRpcProviderError.unknown
+                SolanaRpcProviderError.unknown
             }
         case .failure(let error):
             throw error
