@@ -38,7 +38,11 @@ public class SolanaRPCProvider {
         debugPrint(response)
         switch response.result {
         case .success(let r):
-            return r.result
+            if let result = response.result as? T {
+                return result
+            } else {
+                throw SolanaRpcProviderError.unknown
+            }
         case .failure(let error):
             throw error
         }

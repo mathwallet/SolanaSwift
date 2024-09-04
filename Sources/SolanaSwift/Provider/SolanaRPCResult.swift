@@ -25,7 +25,7 @@ public enum SolanaRpcProviderError: LocalizedError {
 public struct SolanaRpcResult<T: Decodable>: Decodable {
     public var jsonrpc: String?
     public var id: Int
-    public var result: T
+    public var result: T?
     public var error: SolanaRPCError?
 }
 
