@@ -43,7 +43,7 @@ public class SolanaRPCProvider {
             } else if let error = r.error {
                 throw SolanaRpcProviderError.server(message: error.message)
             } else {
-                SolanaRpcProviderError.unknown
+                throw SolanaRpcProviderError.unknown
             }
         case .failure(let error):
             throw error
