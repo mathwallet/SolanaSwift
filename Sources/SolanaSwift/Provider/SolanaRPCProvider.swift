@@ -164,7 +164,7 @@ public class SolanaRPCProvider {
     
     public func sendTransaction(
         encodedString: String,
-        opts: [SolanaRPCOptional] = [.encoding(.base58)]
+        opts: [SolanaRPCOptional]? = nil
     ) async throws -> String {
         var parameters: [Any] = [encodedString]
         if let optsParameters = SolanaRPCOptional.getParameters(opts) {
