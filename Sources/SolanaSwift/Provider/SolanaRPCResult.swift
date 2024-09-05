@@ -164,6 +164,15 @@ public struct SolanaRPCEpochInfoResult: Codable {
     public var transactionCount: UInt64?
 }
 
+public struct SolanaRPCRecentBlockhash: Decodable {
+    public var blockhash: String
+    public var feeCalculator: AnyCodable
+}
+
+public struct SolanaRPCRecentBlockhashResult: Decodable {
+    public var value: SolanaRPCRecentBlockhash
+}
+
 public struct SolanaRPCLatestBlockhash: Decodable {
     public var blockhash: String
     public var lastValidBlockHeight: UInt64

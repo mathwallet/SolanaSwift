@@ -25,7 +25,7 @@ public class SolanaRPCProvider {
         let p: Parameters = [
             "method": method,
             "params": parameters ?? [],
-            "id": 1,
+            "id": self.requestId,
             "jsonrpc": "2.0"
         ]
         let response = await AF.request(
@@ -103,6 +103,11 @@ public class SolanaRPCProvider {
             parameters.append(optsParameters)
         }
         let result: SolanaRPCBlanceValueResult = try await self.sendJsonRpc(method: "getBalance", parameters: parameters)
+        return result.value
+    }
+    
+    public func getRecentBlockhash() async throws -> SolanaRPCRecentBlockhash {
+        let result: SolanaRPCRecentBlockhashResult = try await self.sendJsonRpc(method: "getRecentBlockhash", parameters: nil)
         return result.value
     }
     
