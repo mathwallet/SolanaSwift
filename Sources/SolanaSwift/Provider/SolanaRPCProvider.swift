@@ -25,7 +25,7 @@ public class SolanaRPCProvider {
         let p: Parameters = [
             "method": method,
             "params": parameters ?? [],
-            "id": self.requestId,
+            "id": 1,
             "jsonrpc": "2.0"
         ]
         let response = await AF.request(
