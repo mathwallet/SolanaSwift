@@ -8,109 +8,193 @@
 import Foundation
 import AnyCodable
 
-public struct SolanaSolanaTokenAccountTokenAmount:Codable {
-    public var amount:String?
-    public var uiAmount:Double?
-    public var decimals:Int?
-    public var uiAmountString:String
+public enum SolanaRpcProviderError: LocalizedError {
+    case unknown
+    case server(message: String)
+    
+    public var errorDescription: String? {
+        switch self {
+        case .server(let message):
+            return message
+        default:
+            return "Unknown error"
+        }
+    }
+    
+    public var localizedDescription: String {
+        switch self {
+        case .server(let message):
+            return message
+        default:
+            return "Unknown error"
+        }
+    }
+}
+
+public struct SolanaRpcResult<T: Decodable>: Decodable {
+    public var jsonrpc: String?
+    public var id: Int
+    public var result: T?
+    public var error: SolanaRPCError?
+}
+
+public struct SolanaRPCError: Decodable {
+    public var code: Int
+    public var message: String
+}
+
+public enum SolanaRPCCommitment: String {
+    case finalized
+    case confirmed
+    case processed
+}
+
+public enum SolanaRPCEncoding : String {
+    case base58
+    case base64
+    case base64_zstd = "base64+zstd"
+    case jsonParsed
+}
+
+public enum SolanaRPCOptional {
+    case commitment(_ commitment: SolanaRPCCommitment)
+    case encoding(_ encoding: SolanaRPCEncoding)
+    case minContextSlot(_  minContextSlot: UInt64)
+    
+    public var key: String {
+        switch self {
+        case .commitment:
+            return "commitment"
+        case .encoding:
+            return "encoding"
+        case .minContextSlot:
+            return "minContextSlot"
+        }
+    }
+    
+    public var value: Any {
+        switch self {
+        case .commitment(let commitment):
+            return commitment.rawValue
+        case .encoding(let encoding):
+            return encoding.rawValue
+        case .minContextSlot(let minContextSlot):
+            return minContextSlot
+        }
+    }
+    
+    public static func getParameters(_ opts: [SolanaRPCOptional]?) -> [String: Any]? {
+        guard let _opts = opts, _opts.count > 0 else { return nil }
+        
+        var parameters: [String: Any] = [:]
+        for opt in _opts {
+            parameters[opt.key] = opt.value
+        }
+        return parameters
+    }
+}
+
+public struct SolanaRPCAccountInfo: Decodable {
+    public var lamports: UInt64
+    public var executable: Bool
+    public var owner: SolanaPublicKey
+    public var data: AnyCodable
+}
+
+public struct SolanaRPCAccountInfoResult: Decodable {
+    public var value: SolanaRPCAccountInfo?
+}
+
+public struct SolanaRPCTokenAccountTokenAmount: Decodable {
+    public var amount: String
+    public var decimals:Int
 }
 
 
-public struct SolanaSolanaTokenAccountinfo:Codable {
-    public var accountType:String?
-    public var tokenAmount:SolanaSolanaTokenAccountTokenAmount?
-    public var isInitialized:Bool?
-    public var isNative:Bool?
-    public var mint:String?
-    public var owner:String?
+public struct SolanaRPCTokenAccountinfo: Decodable {
+    public var tokenAmount: SolanaRPCTokenAccountTokenAmount
+    public var isNative: Bool
+    public var mint: SolanaPublicKey
+    public var owner: SolanaPublicKey
 }
 
-public struct SolanaSolanaTokenAccountsparsed:Codable {
-    public var type:String?
-    public var info:SolanaSolanaTokenAccountinfo?
+public struct SolanaRPCTokenAccountDataParsed: Decodable {
+    public var type: String
+    public var info: SolanaRPCTokenAccountinfo
 }
 
-public struct SolanaSolanaTokenAccountsData:Codable {
-    public var program:String?
-    public var parsed:SolanaSolanaTokenAccountsparsed?
+public struct SolanaRPCTokenAccountData: Decodable {
+    public var program: String
+    public var parsed: SolanaRPCTokenAccountDataParsed
 }
 
-public struct SolanaSolanaTokenAccount:Codable {
-    public var data:SolanaSolanaTokenAccountsData?
-    public var executable:Bool?
-    public var lamports:Int64?
-    public var owner:String?
+public struct SolanaRPCTokenAccount: Decodable {
+    public var data: SolanaRPCTokenAccountData
+    public var executable: Bool
+    public var lamports: UInt64
+    public var owner: SolanaPublicKey
 }
 
-public struct SolanaTokenAccountsByOwnerValue:Codable {
-    public var account:SolanaSolanaTokenAccount?
-    public var pubkey:String?
-    public var symbol:String?
+public struct SolanaRPCTokenAccountsByOwner: Decodable {
+    public var pubkey: SolanaPublicKey
+    public var account: SolanaRPCTokenAccount
 }
 
-public struct SolanaTokenAccountsByOwner:Codable {
-    public var value:[SolanaTokenAccountsByOwnerValue]?
+public struct SolanaRPCTokenAccountsByOwnerResult: Decodable {
+    public var value: [SolanaRPCTokenAccountsByOwner]
 }
 
-public struct SolanaTokenSupply: Codable {
+
+
+public struct SolanaRPCTokenSupply: Decodable {
     public var amount: String
     public var decimals: Int
 }
 
-public struct SolanaTokenSupplyResult: Codable {
-    public var value: SolanaTokenSupply
+public struct SolanaRPCTokenSupplyResult: Decodable {
+    public var value: SolanaRPCTokenSupply
 }
 
-public struct SolanaNodeStatusResult: Codable {
-    public var absoluteSlot:Int64?
-    public var blockHeight:Int64?
-    public var epoch:Int64?
-    public var slotIndex:Int64?
-    public var slotsInEpoch:Int64?
-    public var transactionCount:Int64?
+public struct SolanaRPCEpochInfoResult: Codable {
+    public var absoluteSlot: UInt64
+    public var blockHeight: UInt64
+    public var epoch: UInt64
+    public var slotIndex: UInt64
+    public var slotsInEpoch: UInt64
+    public var transactionCount: UInt64?
 }
 
-public struct SolanaFeeCalculator:Codable {
-    public var lamportsPerSignature:Int64?
+public struct SolanaRPCRecentBlockhash: Decodable {
+    public var blockhash: String
+    public var feeCalculator: AnyCodable
 }
 
-
-public struct SolanaRecentBlockhashValue: Codable {
-    public var blockhash:String?
-    public var feeCalculator:SolanaFeeCalculator?
-    public var lastValidBlockHeight:UInt64?
-    public var lastValidSlot:UInt64?
+public struct SolanaRPCRecentBlockhashResult: Decodable {
+    public var value: SolanaRPCRecentBlockhash
 }
 
-public struct SolanaRecentBlockhashResult: Codable {
-    public var value:SolanaRecentBlockhashValue?
+public struct SolanaRPCLatestBlockhash: Decodable {
+    public var blockhash: String
+    public var lastValidBlockHeight: UInt64
 }
 
-public struct SolanaAccountValueResult: Codable {
-    public var lamports:Int64?
-    public var executable:Bool?
-    public var owner:String?
-    public var data:[String]?
+public struct SolanaRPCLatestBlockhashResult: Decodable {
+    public var value: SolanaRPCLatestBlockhash
 }
 
-public struct SolanaJsonRpcAccountResult: Codable {
-    public var value:SolanaAccountValueResult?
+public struct SolanaRPCFeeForMessageResult: Codable {
+    public var value: UInt64?
 }
 
-public struct SolanaBlanceValue: Codable {
-    public var value:Int64?
-}
-
-public struct SolanaJsonRpcError: Codable {
-    public var code:Int?
-    public var message:String?
+public struct SolanaRPCBlanceValueResult: Codable {
+    public var value: UInt64
 }
 
 public struct SolanaNFTTokenResult {
-    public var pubkey:String
-    public var mint:String
-    public var owner:String
-    public var FDAAddress:String
+    public var pubkey: SolanaPublicKey
+    public var mint: SolanaPublicKey
+    public var owner: SolanaPublicKey
+    public var FDAAddress: SolanaPublicKey
     public var amount:Int
 }
 

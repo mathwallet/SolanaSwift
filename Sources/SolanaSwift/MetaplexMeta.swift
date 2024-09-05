@@ -9,10 +9,10 @@
 import Foundation
 
 public struct MetaPlexMeta {
-    public var key:UInt8
-    public var update_authority:SolanaPublicKey
-    public var mint:SolanaPublicKey
-    public var data:MetaPlexData
+    public var key: UInt8
+    public var update_authority: SolanaPublicKey
+    public var mint: SolanaPublicKey
+    public var data: MetaPlexData
 }
 
 extension MetaPlexMeta: BorshCodable {
