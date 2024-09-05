@@ -38,8 +38,8 @@ public class SolanaRPCProvider {
         debugPrint(response)
         switch response.result {
         case .success(let r):
-            if let result = response.result {
-                return result as! T
+            if let result = r.result {
+                return result
             } else if let error = r.error {
                 throw SolanaRpcProviderError.server(message: error.message)
             } else {
