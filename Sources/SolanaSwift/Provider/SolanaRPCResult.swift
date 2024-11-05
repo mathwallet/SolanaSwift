@@ -101,6 +101,15 @@ public struct SolanaRPCAccountInfo: Decodable {
     public var data: AnyCodable
 }
 
+public struct SolanaSignaturesForAddressResult: Decodable {
+    public var err: AnyCodable?
+    public var memo: AnyCodable?
+    public var confirmationStatus: String
+    public var signature: String
+    public var slot: UInt64
+    public var blockTime: UInt64
+}
+
 public struct SolanaRPCAccountInfoResult: Decodable {
     public var value: SolanaRPCAccountInfo?
 }

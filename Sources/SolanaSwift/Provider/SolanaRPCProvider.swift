@@ -145,6 +145,19 @@ public class SolanaRPCProvider {
         return response
     }
     
+    public func getSignaturesForAddress(
+        address: String,
+        limit: Int = 1,
+        opts: [SolanaRPCOptional]? = nil
+    ) async throws -> [SolanaSignaturesForAddressResult] {
+        var parameters: [Any] = [address, ["limit": limit]]
+        if let optsParameters = SolanaRPCOptional.getParameters(opts) {
+            parameters.append(optsParameters)
+        }
+        let response: [SolanaSignaturesForAddressResult] = try await self.sendJsonRpc(method: "getSignaturesForAddress", parameters: parameters)
+        return response
+    }
+    
     public func getMinimumBalanceForRentExemption(
         usize: UInt64? = nil,
         opts: [SolanaRPCOptional]? = nil
