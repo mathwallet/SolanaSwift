@@ -35,7 +35,6 @@ public class SolanaRPCProvider {
             encoding: JSONEncoding.default,
             headers: nil
         ).serializingDecodable(SolanaRpcResult<T>.self).response
-//        debugPrint(response)
         switch response.result {
         case .success(let r):
             if let result = r.result {
@@ -241,7 +240,6 @@ extension SolanaRPCProvider {
             encoding: JSONEncoding.default,
             headers: nil
         ).serializingDecodable(SolanaNFTResult.self).response
-//        debugPrint(response)
         switch response.result {
         case .success(let r):
             return r
@@ -286,7 +284,6 @@ extension SolanaRPCProvider {
             encoding: JSONEncoding.default,
             headers: nil
         ).serializingDecodable(SolanaTokenFilterResult.self).response
-//        debugPrint(response)
         switch response.result {
         case .success(let r):
             var collections = [SolanaTokenCollectibleResult]()
