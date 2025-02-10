@@ -78,7 +78,7 @@ public struct SolanaMessageCompiledInstruction: BorshCodable {
         self.accountKeyIndexes = try .init(from: &reader)
         
         let dataCount = try UVarInt.init(from: &reader).value
-        self.data = Data(reader.read(count: dataCount))
+        self.data = Data(try reader.read(count: dataCount))
     }
 }
 

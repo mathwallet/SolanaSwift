@@ -92,7 +92,7 @@ extension SolanaPublicKey: BorshCodable {
     }
 
     public init(from reader: inout BinaryReader) throws {
-        self.data = Data(reader.read(count: UInt32(SolanaPublicKey.Size)))
+        self.data = Data(try reader.read(count: UInt32(SolanaPublicKey.Size)))
     }
 }
 

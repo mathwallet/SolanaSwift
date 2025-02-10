@@ -34,6 +34,6 @@ extension SolanaSignature: BorshCodable {
     }
 
     public init(from reader: inout BinaryReader) throws {
-        self.data = Data(reader.read(count: 64))
+        self.data = Data(try reader.read(count: 64))
     }
 }

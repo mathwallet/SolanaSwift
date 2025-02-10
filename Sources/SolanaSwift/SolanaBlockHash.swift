@@ -38,6 +38,6 @@ extension SolanaBlockHash: BorshCodable {
     }
 
     public init(from reader: inout BinaryReader) throws {
-        self.data = Data(reader.read(count: 32))
+        self.data = Data(try reader.read(count: 32))
     }
 }

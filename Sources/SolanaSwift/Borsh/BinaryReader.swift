@@ -18,8 +18,11 @@ public struct BinaryReader {
 }
 
 extension BinaryReader {
-    public mutating func read(count: UInt32) -> [UInt8] {
+    public mutating func read(count: UInt32) throws -> [UInt8] {
         let newPosition = self.cursor + Int(count)
+        guard newPosition <= bytes.count else {
+            throw BorshDecodingError.unknownData
+        }
         let result = bytes[cursor..<newPosition]
         cursor = newPosition
         return Array(result)

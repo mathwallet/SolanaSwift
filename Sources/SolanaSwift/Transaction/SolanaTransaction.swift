@@ -127,7 +127,7 @@ extension SolanaTransaction: BorshCodable {
                 signers.append(SolanaSigner(publicKey: publicKeys[Int(i)], isSigner: i < signCount, isWritable: isWritable ))
             }
             let dataCount = try UVarInt.init(from: &reader).value
-            let data = Data(reader.read(count: dataCount))
+            let data = Data(try reader.read(count: dataCount))
             
             let decodeInstruction = SolanaInstructionDecoder.decode(programId: programId, data: data, signers: signers)
             instructions.append(decodeInstruction)

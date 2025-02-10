@@ -27,14 +27,14 @@ extension UVarInt: BorshDeserializable {
             i += 1
         } while (b & 0x80) != 0 && by < 32
         self.value = v
-        let _ = reader.read(count: UInt32(i))
+        let _ = try reader.read(count: UInt32(i))
     }
 }
 
 public extension FixedWidthInteger {
     init(from reader: inout BinaryReader) throws {
         var value: Self = .zero
-        let bytes = reader.read(count: UInt32(MemoryLayout<Self>.size))
+        let bytes = try reader.read(count: UInt32(MemoryLayout<Self>.size))
         let size = withUnsafeMutableBytes(of: &value, { bytes.copyBytes(to: $0) } )
         assert(size == MemoryLayout<Self>.size)
         self = Self(littleEndian: value)
@@ -55,7 +55,7 @@ extension Int128: BorshDeserializable {}
 extension Bool: BorshDeserializable {
     public init(from reader: inout BinaryReader) throws {
         var value: Self = false
-        let bytes = reader.read(count: UInt32(MemoryLayout<Self>.size))
+        let bytes = try reader.read(count: UInt32(MemoryLayout<Self>.size))
         let size = withUnsafeMutableBytes(of: &value, { bytes.copyBytes(to: $0) } )
         assert(size == MemoryLayout<Self>.size)
         self = value
@@ -75,7 +75,7 @@ extension Optional where Wrapped: BorshDeserializable {
 extension String: BorshDeserializable {
     public init(from reader: inout BinaryReader) throws {
         let count: UInt32 = try .init(from: &reader)
-        let bytes = reader.read(count: count)
+        let bytes = try reader.read(count: count)
         guard let value = String(bytes: bytes, encoding: .utf8) else {throw DeserializationError.noData}
         self = value
     }
