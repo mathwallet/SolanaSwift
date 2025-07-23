@@ -97,4 +97,17 @@ extension SolanaProgramToken: SolanaBaseProgram  {
             data: Self.Transfer(amount: amount)
         )
     }
+    
+    public static func transferChecked(source: SolanaPublicKey, destination: SolanaPublicKey, owner: SolanaPublicKey, tokenMint: SolanaPublicKey, amount: UInt64) -> SolanaMessageInstruction {
+        return .init(
+            programId: Self.id,
+            accounts: [
+                SolanaSigner(publicKey: source, isSigner: false, isWritable: true),
+                SolanaSigner(publicKey: tokenMint, isSigner: false, isWritable: false),
+                SolanaSigner(publicKey: destination, isSigner: false, isWritable: true),
+                SolanaSigner(publicKey: owner, isSigner: true, isWritable: true)
+            ],
+            data: Self.Transfer(amount: amount)
+        )
+    }
 }
