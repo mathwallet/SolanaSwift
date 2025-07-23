@@ -98,36 +98,14 @@ extension SolanaPublicKey: BorshCodable {
 }
 
 extension SolanaPublicKey {
-    public static func new2022AssociatedToken(pubkey: SolanaPublicKey, mint: SolanaPublicKey) -> SolanaPublicKey? {
-        var i = 255
-        while i > 0 {
-            do {
-                var data = Data()
-                try pubkey.serialize(to: &data)
-                try SolanaPublicKey.ASSOCIATED_2022_TOKEN_PROGRAM_ID.serialize(to: &data)
-                try mint.serialize(to: &data)
-                try UInt8(i).serialize(to: &data)
-                try SolanaPublicKey.ASSOCIATED_TOKEN_PROGRAM_ID.serialize(to: &data)
-                data.append("ProgramDerivedAddress".data(using: .utf8)!)
-                
-                let hashdata = data.sha256()
-                if (is_on_curve(hashdata.bytes) == 0) {
-                    return SolanaPublicKey(data: hashdata)
-                }
-            } catch _ {
-            }
-            i = i - 1
-        }
-        return nil
-    }
     
-    public static func newAssociatedToken(pubkey: SolanaPublicKey, mint: SolanaPublicKey) -> SolanaPublicKey? {
+    public static func newAssociatedToken(pubkey: SolanaPublicKey, mint: SolanaPublicKey, tokenProgramID: SolanaPublicKey) -> SolanaPublicKey? {
         var i = 255
         while i > 0 {
             do {
                 var data = Data()
                 try pubkey.serialize(to: &data)
-                try SolanaPublicKey.TOKEN_PROGRAM_ID.serialize(to: &data)
+                try tokenProgramID.serialize(to: &data)
                 try mint.serialize(to: &data)
                 try UInt8(i).serialize(to: &data)
                 try SolanaPublicKey.ASSOCIATED_TOKEN_PROGRAM_ID.serialize(to: &data)
