@@ -12,6 +12,7 @@ public enum SolanaProgramToken: BorshCodable {
     case InitializeMint(decimals: UInt8, authority: SolanaPublicKey, freezeAuthority: SolanaPublicKey?)
     case InitializeAccount
     case Transfer(amount: UInt64)
+    case TransferChecked(amount: UInt64, decimal: UInt8)
     
     var type: UInt8 {
         switch self {
@@ -21,6 +22,8 @@ public enum SolanaProgramToken: BorshCodable {
             return 1
         case .Transfer:
             return 3
+        case .TransferChecked:
+            return 12
         }
     }
     
@@ -37,6 +40,9 @@ public enum SolanaProgramToken: BorshCodable {
             break
         case .Transfer(let amount):
             try amount.serialize(to: &writer)
+        case .TransferChecked(let amount, let decimal):
+            try amount.serialize(to: &writer)
+            try decimal.serialize(to: &writer)
         }
     }
     
@@ -53,6 +59,10 @@ public enum SolanaProgramToken: BorshCodable {
         case 3:
             let amount = try UInt64.init(from: &reader)
             self = .Transfer(amount: amount)
+        case 12:
+            let amount = try UInt64.init(from: &reader)
+            let decimal = try UInt8.init(from: &reader)
+            self = .TransferChecked(amount: amount, decimal: decimal)
         default:
             throw BorshDecodingError.unknownData
         }
@@ -61,6 +71,7 @@ public enum SolanaProgramToken: BorshCodable {
 
 extension SolanaProgramToken: SolanaBaseProgram  {
     public static var id: SolanaPublicKey = SolanaPublicKey.TOKEN_PROGRAM_ID
+    public static var token2022id: SolanaPublicKey = SolanaPublicKey.ASSOCIATED_2022_TOKEN_PROGRAM_ID
     
     public static func initializeMint(mint: SolanaPublicKey, decimals: UInt8, authority: SolanaPublicKey, freezeAuthority: SolanaPublicKey?) -> SolanaMessageInstruction {
         return .init(
@@ -95,6 +106,19 @@ extension SolanaProgramToken: SolanaBaseProgram  {
                 SolanaSigner(publicKey: owner, isSigner: true, isWritable: true)
             ],
             data: Self.Transfer(amount: amount)
+        )
+    }
+    
+    public static func transferChecked(source: SolanaPublicKey, destination: SolanaPublicKey, owner: SolanaPublicKey, tokenMint: SolanaPublicKey, amount: UInt64, decimal: UInt8) -> SolanaMessageInstruction {
+        return .init(
+            programId: token2022id,
+            accounts: [
+                SolanaSigner(publicKey: source, isSigner: false, isWritable: true),
+                SolanaSigner(publicKey: tokenMint, isSigner: false, isWritable: false),
+                SolanaSigner(publicKey: destination, isSigner: false, isWritable: true),
+                SolanaSigner(publicKey: owner, isSigner: true, isWritable: true)
+            ],
+            data: Self.TransferChecked(amount: amount, decimal: decimal)
         )
     }
 }

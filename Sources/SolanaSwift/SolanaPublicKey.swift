@@ -17,6 +17,7 @@ public struct SolanaPublicKey {
     public static let TOKEN_PROGRAM_ID = SolanaPublicKey(base58String: "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA")!
     public static let MEMO_PROGRAM_ID = SolanaPublicKey(base58String: "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr")!
     public static let ASSOCIATED_TOKEN_PROGRAM_ID = SolanaPublicKey(base58String: "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL")!
+    public static let ASSOCIATED_2022_TOKEN_PROGRAM_ID = SolanaPublicKey(base58String: "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb")!
     public static let SYSVAR_RENT_PUBKEY = SolanaPublicKey(base58String: "SysvarRent111111111111111111111111111111111")!
     public static let SYSVAR_RECENT_BLOCK_HASHES_PUBKEY = SolanaPublicKey(base58String: "SysvarRecentB1ockHashes11111111111111111111")!
     public static let OWNER_VALIDATION_PROGRAM_ID = SolanaPublicKey(base58String: "4MNPdKu9wFMvEeZBMt3Eipfs5ovVWTJb31pEXDJAAxX5")!
@@ -97,13 +98,14 @@ extension SolanaPublicKey: BorshCodable {
 }
 
 extension SolanaPublicKey {
-    public static func newAssociatedToken(pubkey: SolanaPublicKey, mint: SolanaPublicKey) -> SolanaPublicKey? {
+    
+    public static func newAssociatedToken(pubkey: SolanaPublicKey, mint: SolanaPublicKey, tokenProgramID: SolanaPublicKey) -> SolanaPublicKey? {
         var i = 255
         while i > 0 {
             do {
                 var data = Data()
                 try pubkey.serialize(to: &data)
-                try SolanaPublicKey.TOKEN_PROGRAM_ID.serialize(to: &data)
+                try tokenProgramID.serialize(to: &data)
                 try mint.serialize(to: &data)
                 try UInt8(i).serialize(to: &data)
                 try SolanaPublicKey.ASSOCIATED_TOKEN_PROGRAM_ID.serialize(to: &data)
