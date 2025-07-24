@@ -12,7 +12,7 @@ public enum SolanaProgramToken: BorshCodable {
     case InitializeMint(decimals: UInt8, authority: SolanaPublicKey, freezeAuthority: SolanaPublicKey?)
     case InitializeAccount
     case Transfer(amount: UInt64)
-    case TransferChecked(amount: UInt64)
+    case TransferChecked(amount: UInt64, decimal: UInt8)
     
     var type: UInt8 {
         switch self {
@@ -40,8 +40,9 @@ public enum SolanaProgramToken: BorshCodable {
             break
         case .Transfer(let amount):
             try amount.serialize(to: &writer)
-        case .TransferChecked(let amount):
+        case .TransferChecked(let amount, let decimal):
             try amount.serialize(to: &writer)
+            try decimal.serialize(to: &writer)
         }
     }
     
@@ -60,7 +61,8 @@ public enum SolanaProgramToken: BorshCodable {
             self = .Transfer(amount: amount)
         case 12:
             let amount = try UInt64.init(from: &reader)
-            self = .TransferChecked(amount: amount)
+            let decimal = try UInt8.init(from: &reader)
+            self = .TransferChecked(amount: amount, decimal: decimal)
         default:
             throw BorshDecodingError.unknownData
         }
@@ -107,7 +109,7 @@ extension SolanaProgramToken: SolanaBaseProgram  {
         )
     }
     
-    public static func transferChecked(source: SolanaPublicKey, destination: SolanaPublicKey, owner: SolanaPublicKey, tokenMint: SolanaPublicKey, amount: UInt64) -> SolanaMessageInstruction {
+    public static func transferChecked(source: SolanaPublicKey, destination: SolanaPublicKey, owner: SolanaPublicKey, tokenMint: SolanaPublicKey, amount: UInt64, decimal: UInt8) -> SolanaMessageInstruction {
         return .init(
             programId: token2022id,
             accounts: [
@@ -116,7 +118,7 @@ extension SolanaProgramToken: SolanaBaseProgram  {
                 SolanaSigner(publicKey: destination, isSigner: false, isWritable: true),
                 SolanaSigner(publicKey: owner, isSigner: true, isWritable: true)
             ],
-            data: Self.TransferChecked(amount: amount)
+            data: Self.TransferChecked(amount: amount, decimal: decimal)
         )
     }
 }
