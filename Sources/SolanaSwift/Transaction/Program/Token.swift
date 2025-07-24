@@ -109,12 +109,12 @@ extension SolanaProgramToken: SolanaBaseProgram  {
         )
     }
     
-    public static func transferChecked(source: SolanaPublicKey, destination: SolanaPublicKey, owner: SolanaPublicKey, tokenMint: SolanaPublicKey, amount: UInt64, decimal: UInt8) -> SolanaMessageInstruction {
+    public static func transferChecked(source: SolanaPublicKey, destination: SolanaPublicKey, owner: SolanaPublicKey, mint: SolanaPublicKey, amount: UInt64, decimal: UInt8) -> SolanaMessageInstruction {
         return .init(
-            programId: token2022id,
+            programId: Self.token2022id,
             accounts: [
                 SolanaSigner(publicKey: source, isSigner: false, isWritable: true),
-                SolanaSigner(publicKey: tokenMint, isSigner: false, isWritable: false),
+                SolanaSigner(publicKey: mint, isSigner: false, isWritable: false),
                 SolanaSigner(publicKey: destination, isSigner: false, isWritable: true),
                 SolanaSigner(publicKey: owner, isSigner: true, isWritable: true)
             ],
