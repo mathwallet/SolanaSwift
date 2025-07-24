@@ -71,7 +71,7 @@ public enum SolanaProgramToken: BorshCodable {
 
 extension SolanaProgramToken: SolanaBaseProgram  {
     public static var id: SolanaPublicKey = SolanaPublicKey.TOKEN_PROGRAM_ID
-    public static var token2022id: SolanaPublicKey = SolanaPublicKey.ASSOCIATED_2022_TOKEN_PROGRAM_ID
+    public static var token2022id: SolanaPublicKey = SolanaPublicKey.TOKEN2022_PROGRAM_ID
     
     public static func initializeMint(mint: SolanaPublicKey, decimals: UInt8, authority: SolanaPublicKey, freezeAuthority: SolanaPublicKey?) -> SolanaMessageInstruction {
         return .init(

@@ -40,7 +40,7 @@ public struct SolanaInstructionDecoder {
                 i.signers = signers
                 return i
             }
-        } else if programId == SolanaPublicKey.ASSOCIATED_2022_TOKEN_PROGRAM_ID {
+        } else if programId == SolanaPublicKey.TOKEN2022_PROGRAM_ID {
             if var i = try? BorshDecoder.decode(SolanaInstructionTransferChecked.self, from: data) {
                 i.signers = signers
                 return i

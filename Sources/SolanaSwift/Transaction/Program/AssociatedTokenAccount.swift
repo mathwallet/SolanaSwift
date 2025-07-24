@@ -75,7 +75,7 @@ extension SolanaProgramAssociatedTokenAccount: SolanaBaseProgram {
                 SolanaSigner(publicKey: owner, isSigner: false, isWritable: false),
                 SolanaSigner(publicKey: mint, isSigner: false, isWritable: false),
                 SolanaSigner(publicKey: .SYSTEM_PROGRAM_ID, isSigner: false, isWritable: false),
-                SolanaSigner(publicKey: .ASSOCIATED_2022_TOKEN_PROGRAM_ID, isSigner: false, isWritable: false),
+                SolanaSigner(publicKey: .TOKEN2022_PROGRAM_ID, isSigner: false, isWritable: false),
                 SolanaSigner(publicKey: .SYSVAR_RENT_PUBKEY, isSigner: false, isWritable: false)
             ],
             data: Self.Create
