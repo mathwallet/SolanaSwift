@@ -30,20 +30,21 @@ final class SolanaSwiftTests: XCTestCase {
             funding: SolanaPublicKey(base58String: "D37m1SKWnyY4fmhEntD84uZpjejUZkbHQUBEP3X74LuH")!,
             wallet:  SolanaPublicKey(base58String: "4KxYRXTZ4PXXDCvaQeG75HLJFdKrwVY6bX5nckp8jpHh")!,
             associatedToken: SolanaPublicKey(base58String: "CoPhcr5DrGZx6a3pbB2BmrTHjNAokZScQVUdyqCNWyRR")!,
-            mint: SolanaPublicKey(base58String: "GeDS162t9yGJuLEHPWXXGrb1zwkzinCgRwnT8vHYjKza")!
+            mint: SolanaPublicKey(base58String: "GeDS162t9yGJuLEHPWXXGrb1zwkzinCgRwnT8vHYjKza")!,
+            tokenProgramID: .TOKEN_PROGRAM_ID
         )
         var transaction = SolanaTransaction()
         transaction.recentBlockhash = SolanaBlockHash(base58String: "9h5dnhmz3vwL25RZ699ZGV7j1NvJ3C2HhPQPcjtDaqcH")!
         transaction.appendInstruction(instruction: transferInstruction)
         transaction.appendInstruction(instruction: associatedInstruction)
         
-        debugPrint(transaction.sortedSigners.map({[$0.publicKey.address, $0.isSigner, $0.isWritable]}))
+        debugPrint(transaction.sortedSigners.map({[$0.publicKey.address, $0.publicKey.data.toHexString(), $0.isSigner, $0.isWritable]}))
         
         let keypair = try SolanaKeyPair(mnemonics: self.mnemonics, path: SolanaMnemonicPath.PathType.Ed25519.default)
         let signedTransaction = try transaction.sign(keypair: keypair)
         
         let encodeData = try BorshEncoder().encode(signedTransaction)
-        XCTAssertEqual(encodeData.toHexString(), "01f0484c72f2ac1cb0b9e7131761d1aa16005fbc61f3e3d912d5a3ef092b1dcf794f497ff884451cabd2f9242ad1bbfedd0684588118a65ab0867f2ee5edb6760101000609b2d70c003063053412e81ef8386be56719e03425fdce04fc8b6b70a139df139caf52f0d3bb38368a2d7ea17db4bf34393155113a0a3384f9115cc2968c808e20e47c4c5496c9385a7b147c0771976f1b1d78be5f35bfd29aca33260d9e731730316e510e603bf1ce2c4c06aac011a8f299415a91823b27843e471bdf68c0350400000000000000000000000000000000000000000000000000000000000000008c97258f4e2489f1bb3d1029148e0d830b5a1399daff1084048e7bd8dbe9f859e867d9845930950c31c76e1573a82de99b91eac9d2ee95eb9b29a722e1db1bd306a7d517192c5c51218cc94c3d4af17f58daee089ba1fd44e3dbd98a0000000006ddf6e1d765a193d9cbe146ceeb79ac1cb485ed5f5b37913a8cf5857eff00a98121f7bf81d0a9a955ebf510df653b22672e985c55c69f8e4f2b95e8a398a38602040200020c02000000881300000000000005070001030604080700")
+        XCTAssertEqual(encodeData.toHexString(), "0111394b82bf880e1f4c3eb759fe105671fc8dfd72e86e15744f949dd74e450064d6a3e8f408ff99773bd0fe82b3dd59739adcb336d8330ca98c6a7b87e53b2d0501000609b2d70c003063053412e81ef8386be56719e03425fdce04fc8b6b70a139df139caf52f0d3bb38368a2d7ea17db4bf34393155113a0a3384f9115cc2968c808e20e47c4c5496c9385a7b147c0771976f1b1d78be5f35bfd29aca33260d9e7317300000000000000000000000000000000000000000000000000000000000000000316e510e603bf1ce2c4c06aac011a8f299415a91823b27843e471bdf68c035048c97258f4e2489f1bb3d1029148e0d830b5a1399daff1084048e7bd8dbe9f859e867d9845930950c31c76e1573a82de99b91eac9d2ee95eb9b29a722e1db1bd306a7d517192c5c51218cc94c3d4af17f58daee089ba1fd44e3dbd98a0000000006ddf6e1d765a193d9cbe146ceeb79ac1cb485ed5f5b37913a8cf5857eff00a98121f7bf81d0a9a955ebf510df653b22672e985c55c69f8e4f2b95e8a398a38602030200020c0200000088130000000000000507000104060308070100")
         
         let decodedSignedTransaction = try BorshDecoder.decode(SolanaSignedTransaction.self, from: encodeData)
         debugPrint(decodedSignedTransaction.toHuman())
@@ -209,7 +210,8 @@ final class SolanaSwiftTests: XCTestCase {
                 funding: SolanaPublicKey(base58String: "D37m1SKWnyY4fmhEntD84uZpjejUZkbHQUBEP3X74LuH")!,
                 wallet:  SolanaPublicKey(base58String: "4KxYRXTZ4PXXDCvaQeG75HLJFdKrwVY6bX5nckp8jpHh")!,
                 associatedToken: SolanaPublicKey(base58String: "CoPhcr5DrGZx6a3pbB2BmrTHjNAokZScQVUdyqCNWyRR")!,
-                mint: SolanaPublicKey(base58String: "GeDS162t9yGJuLEHPWXXGrb1zwkzinCgRwnT8vHYjKza")!
+                mint: SolanaPublicKey(base58String: "GeDS162t9yGJuLEHPWXXGrb1zwkzinCgRwnT8vHYjKza")!,
+                tokenProgramID: .TOKEN_PROGRAM_ID
             ),
             SolanaInstructionAssetOwner(
                 destination: SolanaPublicKey(base58String: "D37m1SKWnyY4fmhEntD84uZpjejUZkbHQUBEP3X74LuH")!,
@@ -229,7 +231,8 @@ final class SolanaSwiftTests: XCTestCase {
                 funder: SolanaPublicKey(base58String: "D37m1SKWnyY4fmhEntD84uZpjejUZkbHQUBEP3X74LuH")!,
                 associatedToken: SolanaPublicKey(base58String: "CoPhcr5DrGZx6a3pbB2BmrTHjNAokZScQVUdyqCNWyRR")!,
                 owner: SolanaPublicKey(base58String: "4KxYRXTZ4PXXDCvaQeG75HLJFdKrwVY6bX5nckp8jpHh")!,
-                mint: SolanaPublicKey(base58String: "GeDS162t9yGJuLEHPWXXGrb1zwkzinCgRwnT8vHYjKza")!
+                mint: SolanaPublicKey(base58String: "GeDS162t9yGJuLEHPWXXGrb1zwkzinCgRwnT8vHYjKza")!,
+                tokenProgramID: .TOKEN_PROGRAM_ID
             ),
             SolanaProgramOwnerValidation.createOwnerValidation(
                 account: SolanaPublicKey(base58String: "D37m1SKWnyY4fmhEntD84uZpjejUZkbHQUBEP3X74LuH")!,

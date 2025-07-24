@@ -1,5 +1,5 @@
 //
-//  SolanaInstructionTransfer.swift
+//  SolanaInstructionToken2022.swift
 //  MathWallet5
 //
 //  Created by xgblin on 2021/8/24.
@@ -8,8 +8,8 @@
 import Foundation
 import BigInt
 
-public struct SolanaInstructionTransferChecked: SolanaInstructionBase {
-    public var programId: SolanaPublicKey = SolanaPublicKey.SYSTEM_PROGRAM_ID
+public struct SolanaInstructionToken2022: SolanaInstructionBase {
+    public var programId: SolanaPublicKey = SolanaPublicKey.TOKEN2022_PROGRAM_ID
     public var signers: [SolanaSigner]
     private let lamports: BigUInt
     private let decimal: BigUInt
@@ -24,17 +24,17 @@ public struct SolanaInstructionTransferChecked: SolanaInstructionBase {
     }
 }
 
-extension SolanaInstructionTransferChecked: BorshCodable {
+extension SolanaInstructionToken2022: BorshCodable {
     public func serialize(to writer: inout Data) throws {
         // Instruction Type
-        try UInt32(2).serialize(to: &writer)
+        try UInt8(12).serialize(to: &writer)
         try UInt64(lamports.description)!.serialize(to: &writer)
         try UInt8(decimal.description)!.serialize(to: &writer)
     }
     
     public init(from reader: inout BinaryReader) throws {
         // Instruction Type
-        guard try UInt32.init(from: &reader)  == 2 else {
+        guard try UInt32.init(from: &reader)  == 12 else {
             throw BorshDecodingError.unknownData
         }
         signers = []
@@ -43,7 +43,7 @@ extension SolanaInstructionTransferChecked: BorshCodable {
     }
 }
 
-extension SolanaInstructionTransferChecked: SolanaHumanReadable {
+extension SolanaInstructionToken2022: SolanaHumanReadable {
     public func toHuman() -> Any {
         return [
             "type": "TransferChecked",

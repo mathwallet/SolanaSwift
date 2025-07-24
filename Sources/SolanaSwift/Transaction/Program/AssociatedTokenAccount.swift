@@ -50,7 +50,7 @@ public enum SolanaProgramAssociatedTokenAccount: BorshCodable {
 extension SolanaProgramAssociatedTokenAccount: SolanaBaseProgram {
     public static var id: SolanaPublicKey = .ASSOCIATED_TOKEN_PROGRAM_ID
     
-    public static func create(funder: SolanaPublicKey, associatedToken: SolanaPublicKey, owner: SolanaPublicKey, mint: SolanaPublicKey) -> SolanaMessageInstruction {
+    public static func create(funder: SolanaPublicKey, associatedToken: SolanaPublicKey, owner: SolanaPublicKey, mint: SolanaPublicKey, tokenProgramID: SolanaPublicKey) -> SolanaMessageInstruction {
         return .init(
             programId: Self.id,
             accounts: [
@@ -59,30 +59,14 @@ extension SolanaProgramAssociatedTokenAccount: SolanaBaseProgram {
                 SolanaSigner(publicKey: owner, isSigner: false, isWritable: false),
                 SolanaSigner(publicKey: mint, isSigner: false, isWritable: false),
                 SolanaSigner(publicKey: .SYSTEM_PROGRAM_ID, isSigner: false, isWritable: false),
-                SolanaSigner(publicKey: .TOKEN_PROGRAM_ID, isSigner: false, isWritable: false),
+                SolanaSigner(publicKey: tokenProgramID, isSigner: false, isWritable: false),
                 SolanaSigner(publicKey: .SYSVAR_RENT_PUBKEY, isSigner: false, isWritable: false)
             ],
             data: Self.Create
         )
     }
     
-    public static func createTransferChecked(funder: SolanaPublicKey, associatedToken: SolanaPublicKey, owner: SolanaPublicKey, mint: SolanaPublicKey) -> SolanaMessageInstruction {
-        return .init(
-            programId: Self.id,
-            accounts: [
-                SolanaSigner(publicKey: funder, isSigner: true, isWritable: true),
-                SolanaSigner(publicKey: associatedToken, isSigner: false, isWritable: true),
-                SolanaSigner(publicKey: owner, isSigner: false, isWritable: false),
-                SolanaSigner(publicKey: mint, isSigner: false, isWritable: false),
-                SolanaSigner(publicKey: .SYSTEM_PROGRAM_ID, isSigner: false, isWritable: false),
-                SolanaSigner(publicKey: .TOKEN2022_PROGRAM_ID, isSigner: false, isWritable: false),
-                SolanaSigner(publicKey: .SYSVAR_RENT_PUBKEY, isSigner: false, isWritable: false)
-            ],
-            data: Self.Create
-        )
-    }
-    
-    public static func createIdempotent(funder: SolanaPublicKey, associatedTokenAccount: SolanaPublicKey, owner: SolanaPublicKey, mint: SolanaPublicKey) throws -> SolanaMessageInstruction {
+    public static func createIdempotent(funder: SolanaPublicKey, associatedTokenAccount: SolanaPublicKey, owner: SolanaPublicKey, mint: SolanaPublicKey, tokenProgramID: SolanaPublicKey) throws -> SolanaMessageInstruction {
         return .init(
             programId: Self.id,
             accounts: [
@@ -91,14 +75,14 @@ extension SolanaProgramAssociatedTokenAccount: SolanaBaseProgram {
                 SolanaSigner(publicKey: owner, isSigner: false, isWritable: false),
                 SolanaSigner(publicKey: mint, isSigner: false, isWritable: false),
                 SolanaSigner(publicKey: .SYSTEM_PROGRAM_ID, isSigner: false, isWritable: false),
-                SolanaSigner(publicKey: .TOKEN_PROGRAM_ID, isSigner: false, isWritable: false),
+                SolanaSigner(publicKey: tokenProgramID, isSigner: false, isWritable: false),
                 SolanaSigner(publicKey: .SYSVAR_RENT_PUBKEY, isSigner: false, isWritable: false)
             ],
             data: Self.CreateIdempotent
         )
     }
     
-    public static func recoverNested(owner: SolanaPublicKey, ownerMint: SolanaPublicKey, ownerAssociatedTokenAccount: SolanaPublicKey, nestedMint: SolanaPublicKey, nestedMintAssociatedTokenAccount: SolanaPublicKey, destinationAssociatedTokenAccount: SolanaPublicKey) -> SolanaMessageInstruction {
+    public static func recoverNested(owner: SolanaPublicKey, ownerMint: SolanaPublicKey, ownerAssociatedTokenAccount: SolanaPublicKey, nestedMint: SolanaPublicKey, nestedMintAssociatedTokenAccount: SolanaPublicKey, destinationAssociatedTokenAccount: SolanaPublicKey, tokenProgramID: SolanaPublicKey) -> SolanaMessageInstruction {
         return .init(
             programId: Self.id,
             accounts: [
@@ -108,7 +92,7 @@ extension SolanaProgramAssociatedTokenAccount: SolanaBaseProgram {
                 SolanaSigner(publicKey: ownerAssociatedTokenAccount, isSigner: false, isWritable: true),
                 SolanaSigner(publicKey: ownerMint, isSigner: false, isWritable: false),
                 SolanaSigner(publicKey: owner, isSigner: true, isWritable: true),
-                SolanaSigner(publicKey: .TOKEN_PROGRAM_ID, isSigner: false, isWritable: false)
+                SolanaSigner(publicKey: tokenProgramID, isSigner: false, isWritable: false)
             ],
             data: Self.RecoverNested
         )

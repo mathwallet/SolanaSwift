@@ -11,14 +11,14 @@ public struct SolanaInstructionAssociatedAccount: SolanaInstructionBase {
     public var programId: SolanaPublicKey = SolanaPublicKey.ASSOCIATED_TOKEN_PROGRAM_ID
     public var signers: [SolanaSigner]
     
-    public init(funding: SolanaPublicKey, wallet: SolanaPublicKey, associatedToken: SolanaPublicKey, mint: SolanaPublicKey) {
+    public init(funding: SolanaPublicKey, wallet: SolanaPublicKey, associatedToken: SolanaPublicKey, mint: SolanaPublicKey, tokenProgramID: SolanaPublicKey) {
         self.signers = [
             SolanaSigner(publicKey: funding, isSigner: true, isWritable: true),
             SolanaSigner(publicKey: associatedToken, isSigner: false, isWritable: true),
             SolanaSigner(publicKey: wallet),
             SolanaSigner(publicKey: mint),
             SolanaSigner(publicKey: SolanaPublicKey.SYSTEM_PROGRAM_ID),
-            SolanaSigner(publicKey: SolanaPublicKey.TOKEN_PROGRAM_ID),
+            SolanaSigner(publicKey: tokenProgramID),
             SolanaSigner(publicKey: SolanaPublicKey.SYSVAR_RENT_PUBKEY)
         ]
     }

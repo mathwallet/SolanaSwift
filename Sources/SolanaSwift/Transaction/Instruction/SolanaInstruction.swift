@@ -41,7 +41,7 @@ public struct SolanaInstructionDecoder {
                 return i
             }
         } else if programId == SolanaPublicKey.TOKEN2022_PROGRAM_ID {
-            if var i = try? BorshDecoder.decode(SolanaInstructionTransferChecked.self, from: data) {
+            if var i = try? BorshDecoder.decode(SolanaInstructionToken2022.self, from: data) {
                 i.signers = signers
                 return i
             }
