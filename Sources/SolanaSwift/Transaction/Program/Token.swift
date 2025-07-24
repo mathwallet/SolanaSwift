@@ -69,6 +69,7 @@ public enum SolanaProgramToken: BorshCodable {
 
 extension SolanaProgramToken: SolanaBaseProgram  {
     public static var id: SolanaPublicKey = SolanaPublicKey.TOKEN_PROGRAM_ID
+    public static var token2022id: SolanaPublicKey = SolanaPublicKey.ASSOCIATED_2022_TOKEN_PROGRAM_ID
     
     public static func initializeMint(mint: SolanaPublicKey, decimals: UInt8, authority: SolanaPublicKey, freezeAuthority: SolanaPublicKey?) -> SolanaMessageInstruction {
         return .init(
@@ -108,7 +109,7 @@ extension SolanaProgramToken: SolanaBaseProgram  {
     
     public static func transferChecked(source: SolanaPublicKey, destination: SolanaPublicKey, owner: SolanaPublicKey, tokenMint: SolanaPublicKey, amount: UInt64) -> SolanaMessageInstruction {
         return .init(
-            programId: Self.id,
+            programId: token2022id,
             accounts: [
                 SolanaSigner(publicKey: source, isSigner: false, isWritable: true),
                 SolanaSigner(publicKey: tokenMint, isSigner: false, isWritable: false),
