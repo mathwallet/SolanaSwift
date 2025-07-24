@@ -12,6 +12,7 @@ public enum SolanaProgramToken: BorshCodable {
     case InitializeMint(decimals: UInt8, authority: SolanaPublicKey, freezeAuthority: SolanaPublicKey?)
     case InitializeAccount
     case Transfer(amount: UInt64)
+    case TransferChecked(amount: UInt64)
     
     var type: UInt8 {
         switch self {
@@ -21,6 +22,8 @@ public enum SolanaProgramToken: BorshCodable {
             return 1
         case .Transfer:
             return 3
+        case .TransferChecked:
+            return 12
         }
     }
     
@@ -36,6 +39,8 @@ public enum SolanaProgramToken: BorshCodable {
         case .InitializeAccount:
             break
         case .Transfer(let amount):
+            try amount.serialize(to: &writer)
+        case .TransferChecked(let amount):
             try amount.serialize(to: &writer)
         }
     }
@@ -53,6 +58,9 @@ public enum SolanaProgramToken: BorshCodable {
         case 3:
             let amount = try UInt64.init(from: &reader)
             self = .Transfer(amount: amount)
+        case 12:
+            let amount = try UInt64.init(from: &reader)
+            self = .TransferChecked(amount: amount)
         default:
             throw BorshDecodingError.unknownData
         }
@@ -107,7 +115,7 @@ extension SolanaProgramToken: SolanaBaseProgram  {
                 SolanaSigner(publicKey: destination, isSigner: false, isWritable: true),
                 SolanaSigner(publicKey: owner, isSigner: true, isWritable: true)
             ],
-            data: Self.Transfer(amount: amount)
+            data: Self.TransferChecked(amount: amount)
         )
     }
 }
