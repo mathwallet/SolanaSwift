@@ -31,7 +31,6 @@ let package = Package(
                 "Alamofire",
                 "BIP39swift",
                 .product(name: "BIP32Swift", package: "Secp256k1Swift"),
-                "CryptoSwift",
                 "Base58Swift",
                 "TweetNacl",
                 "AnyCodable"
