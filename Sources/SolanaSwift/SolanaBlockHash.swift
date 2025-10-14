@@ -28,7 +28,7 @@ public struct SolanaBlockHash {
 
 extension SolanaBlockHash: CustomStringConvertible {
     public var description: String {
-        return data.bytes.base58EncodedString
+        return data.byteArray.base58EncodedString
     }
 }
 

@@ -26,7 +26,7 @@ public struct SolanaPublicKey {
     
     public let data: Data
     public var address: String {
-        return self.data.bytes.base58EncodedString
+        return self.data.byteArray.base58EncodedString
     }
     
     public init(data: Data) {
@@ -112,7 +112,7 @@ extension SolanaPublicKey {
                 data.append("ProgramDerivedAddress".data(using: .utf8)!)
                 
                 let hashdata = data.sha256()
-                if (is_on_curve(hashdata.bytes) == 0) {
+                if (is_on_curve(hashdata.byteArray) == 0) {
                     return SolanaPublicKey(data: hashdata)
                 }
             } catch _ {
@@ -135,7 +135,7 @@ extension SolanaPublicKey {
                 data.append("ProgramDerivedAddress".data(using: .utf8)!)
                 
                 let hashdata = data.sha256()
-                if (is_on_curve(hashdata.bytes) == 0) {
+                if (is_on_curve(hashdata.byteArray) == 0) {
                     return SolanaPublicKey(data: hashdata)
                 }
             } catch _ {
@@ -156,7 +156,7 @@ extension SolanaPublicKey {
                 data.append("ProgramDerivedAddress".data(using: .utf8)!)
                 
                 let hashdata = data.sha256()
-                if (is_on_curve(hashdata.bytes) == 0) {
+                if (is_on_curve(hashdata.byteArray) == 0) {
                     return SolanaPublicKey(data: hashdata)
                 }
             } catch _ {

@@ -113,7 +113,7 @@ final class SolanaSwiftTests: XCTestCase {
     }
     
     func testDeriveKeyExample() throws {
-        guard let mnemonicSeed = BIP39.seedFromMmemonics(self.mnemonics) else {
+        guard let mnemonicSeed = BIP39.seedFromMnemonics(self.mnemonics) else {
             XCTAssert(false)
             return
         }
@@ -128,7 +128,7 @@ final class SolanaSwiftTests: XCTestCase {
     }
     
     func testDeriveKeyExample2() throws {
-        guard let mnemonicSeed = BIP39.seedFromMmemonics(self.mnemonics) else {
+        guard let mnemonicSeed = BIP39.seedFromMnemonics(self.mnemonics) else {
             XCTAssert(false)
             return
         }
@@ -174,7 +174,7 @@ final class SolanaSwiftTests: XCTestCase {
     
     func testVersionedTransaction() throws {
         let data = Data(hex: "8001000812e47c4c5496c9385a7b147c0771976f1b1d78be5f35bfd29aca33260d9e7317301fd46c617a78d58ad3b5f07f56aac435561d1871baaed6823aa59f00fb30adb81fe6f0cf948fdbfc2684fa31f99ff65fc32a0649394ca66de344bd86ce4c3cdd33a6027081c1e80836ff22e525fa6b1d29a1596604d2b59d5ae81c198bb7227334095ec686a1ace53c70e6daee8aeb6cbe5e17c8cd300f2718b80ac86c9c029f38aa095869b344ecb3c4700ae48cfa191a38fdd811728d6809e04325afd93ee83ffc3a2c388976abb424dd6e9f207dbb4ad2376386c3d781a5356ab4b7af088d5d2b063a064e144f91b674b9781d9a7ebb1ea8cf3e37567d2802eeac7c33466c676b3df0361794418b038738ecfaa51f7b7f32bdd23b26cb058504046ccb1e30c9317918e86000bca6fc7f1d0b1a1897f0e3814bf6e7486e8b00cc995a6b180000000000000000000000000000000000000000000000000000000000000000000306466fe5211732ffecadba72c39be7bc8ce5bbc5f7126b2c439b3a400000000479d55bf231c06eee74c56ece681507fdb1b2dea3f48e5102b1cda256bc138f06ddf6e1d765a193d9cbe146ceeb79ac1cb485ed5f5b37913a8cf5857eff00a920b5e7b3f8fe3d8936a37ce01660130a00a7c3a89975278587fa6f61cbb0a3188c97258f4e2489f1bb3d1029148e0d830b5a1399daff1084048e7bd8dbe9f859b43ffa27f5d7f64a74c09b1f295879de4b09ab36dfc9dd514b321aa7b38ce5e8ce010e60afedb22717bd63192f54145a3f965a33bb82d2c7029eb2ce1e2082641de90a68a46df33b5ba88cbeb9d01c9831d360fed1246822fbd87dd6456e46a7050b00050207e707000b000903d9960000000000000f060008001d0a0d01010c310d0e0003020108111d0c0c100c24250d260e02051c1a1b2220210e0504191817160d2323151e0d0e14011204130706091f2dc1209b3341d69c810d030000000a64000109640102110064020352140200000000007c251300000000003200000d0308000001090378566ccc5be24d6ad5d525cf77c8f5222f0c199063bfcfffc8ceb9fabe0a6bdf03111315031c1918e981bf8eefb6ff3425592659ab35729b34987f3008500439cd98ca7af239ac6a0509080b0c0d04070e0f0ab21d5a886407a519ce0ff9031bbc446a8378afa22c3d6373f2f540c27da5a63e03282c2a03292d2e")
-        var binaryReader = BinaryReader(bytes: data.bytes)
+        var binaryReader = BinaryReader(bytes: data.byteArray)
         let tx = try SolanaVersionedTransaction.init(from: &binaryReader)
         debugPrint(tx.version)
         debugPrint(tx.toHuman())

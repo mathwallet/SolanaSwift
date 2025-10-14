@@ -32,7 +32,7 @@ public struct SolanaKeyPair {
     }
     
     public init(mnemonics: String, path: String) throws {
-        guard let mnemonicSeed = BIP39.seedFromMmemonics(mnemonics) else {
+        guard let mnemonicSeed = BIP39.seedFromMnemonics(mnemonics) else {
             throw Error.invalidMnemonic
         }
         
